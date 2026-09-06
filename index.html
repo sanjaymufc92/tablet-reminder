@@ -98,6 +98,48 @@
   .tm-header h1{margin:0;font-size:24px;font-weight:600;}
   .tm-header p{margin:4px 0 0;font-size:13px;color:var(--muted);}
   .tm-header-actions{display:flex;gap:8px;flex-shrink:0;}
+
+  /* pregnancy tracking card (inside Tablet Master) */
+  .preg-card{margin-top:18px;border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:14px 16px;}
+  .preg-card h3{margin:0;font-size:14px;font-weight:600;}
+  .preg-card-sub{margin:3px 0 0;font-size:12px;color:var(--muted);}
+  .preg-setup{margin-top:12px;}
+  .preg-setup .field{margin-top:10px;}
+  .preg-saved p{margin:0 0 10px;font-size:13px;color:var(--text);line-height:1.5;}
+  .preg-saved-actions{display:flex;gap:8px;}
+
+  /* milestones view */
+  .mile-summary{margin-top:18px;border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:14px 16px;}
+  .mile-summary p{margin:0;font-size:13px;color:var(--muted);}
+  .mile-summary .big{font-size:16px;font-weight:600;color:var(--text);margin-bottom:3px;}
+  .mile-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
+  .mile-card{border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:12px 14px;display:flex;gap:12px;}
+  .mile-card.done{background:var(--surface-2);opacity:.65;}
+  .mile-card.duenow{border-color:var(--warn-border);background:var(--warn-bg);}
+  .mile-info{min-width:0;flex:1;}
+  .mile-name{margin:0;font-size:14.5px;font-weight:500;}
+  .mile-card.done .mile-name{text-decoration:line-through;color:var(--muted);}
+  .mile-meta{margin-top:4px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;}
+  .mile-date{font-size:12px;color:var(--muted);}
+  .mile-status{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid;}
+  .mile-status.upcoming{color:var(--muted);border-color:var(--line-strong);}
+  .mile-status.duenow{color:var(--warn-text);border-color:var(--warn-border);}
+  .mile-status.done{color:var(--mint);border-color:#1E4A42;}
+  .mile-note{margin:6px 0 0;font-size:12px;color:var(--muted-dim);line-height:1.4;}
+
+  /* weight tracking */
+  .weight-section{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);}
+  .weight-title{font-size:16px;font-weight:600;margin:0 0 12px;}
+  .weight-stats{font-size:13px;color:var(--muted);margin-bottom:12px;}
+  .weight-stats b{color:var(--text);}
+  .weight-chart-wrap{border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:10px;margin-bottom:14px;}
+  .weight-chart-wrap svg{width:100%;height:auto;display:block;}
+  .weight-form{border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+  .weight-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+  .weight-row{display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:9px 12px;font-size:13px;}
+  .weight-row .wr-date{color:var(--muted);flex-shrink:0;width:70px;}
+  .weight-row .wr-val{font-weight:600;flex-shrink:0;width:58px;}
+  .weight-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .add-btn{width:42px;height:42px;border-radius:50%;background:var(--mint);color:var(--on-mint);border:none;cursor:pointer;
     font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .io-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--muted);
@@ -177,8 +219,8 @@
   .nav-inner{display:flex;gap:3px;padding:6px;border-radius:18px;border:1px solid var(--line-strong);
     background:rgba(16,28,25,0.92);backdrop-filter:blur(6px);box-shadow:0 10px 30px rgba(0,0,0,.4);}
   [data-theme="light"] .nav-inner{background:rgba(255,255,255,0.9);}
-  .nav-inner button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:12.5px;font-weight:600;
-    padding:10px 13px;border-radius:12px;cursor:pointer;white-space:nowrap;}
+  .nav-inner button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:600;
+    padding:10px 11px;border-radius:12px;cursor:pointer;white-space:nowrap;}
   .nav-inner button.active{background:var(--mint);color:var(--on-mint);}
 
   .view{display:none;}
@@ -245,6 +287,33 @@
       </div>
     </div>
     <input type="file" id="importFile" accept="application/json">
+
+    <div id="pregCard" class="preg-card">
+      <h3>Pregnancy tracking (optional)</h3>
+      <p class="preg-card-sub">Enter your LMP or EDD to see your India-based milestone schedule.</p>
+
+      <div id="pregSetup" class="preg-setup">
+        <div class="seg" id="pregMode">
+          <button type="button" data-val="lmp" class="active">I know my LMP</button>
+          <button type="button" data-val="edd">I know my EDD</button>
+        </div>
+        <div class="field">
+          <label id="pregDateLabel">Last menstrual period date</label>
+          <input type="date" id="pregDateInput">
+        </div>
+        <div class="form-actions" style="margin-top:10px;">
+          <button class="btn primary" id="pregSaveBtn">Save &amp; calculate milestones</button>
+        </div>
+      </div>
+
+      <div id="pregSaved" class="preg-saved hidden">
+        <p id="pregSavedText"></p>
+        <div class="preg-saved-actions">
+          <button class="mini-btn" id="pregEditBtn">Edit</button>
+          <button class="mini-btn ghost" id="pregClearBtn">Clear</button>
+        </div>
+      </div>
+    </div>
 
     <div id="tabletForm" class="form">
       <div class="field">
@@ -324,6 +393,50 @@
     </div>
   </div>
 
+  <!-- ===== MILESTONES VIEW ===== -->
+  <div id="milestonesView" class="view">
+    <div class="hist-header">
+      <div>
+        <h1 class="display">Milestones</h1>
+        <p>Your pregnancy schedule, based on standard India ANC guidelines.</p>
+      </div>
+      <button class="theme-toggle-btn io-btn" title="Toggle theme">🌙</button>
+    </div>
+
+    <div id="mileNotSet" class="empty-state hidden">
+      🤰<br><br>Add your LMP or EDD date in Tablet Master to see your milestone schedule.
+      <div class="form-actions" style="margin-top:16px;">
+        <button class="btn primary" id="mileGoSetup">Set it up now</button>
+      </div>
+    </div>
+
+    <div id="mileContent" class="hidden">
+      <div class="mile-summary">
+        <p class="big" id="mileSummaryBig"></p>
+        <p id="mileSummarySmall"></p>
+      </div>
+      <div class="mile-list" id="mileList"></div>
+
+      <div class="weight-section">
+        <h3 class="weight-title display">Weight tracking</h3>
+        <div id="weightStats" class="weight-stats hidden"></div>
+        <div id="weightChartWrap" class="weight-chart-wrap hidden"><svg id="weightChart" viewBox="0 0 320 140"></svg></div>
+        <div id="weightEmpty" class="empty-state hidden">Log your weight at each visit to see your trend here.</div>
+
+        <div class="weight-form">
+          <div class="field-row">
+            <div class="field"><label>Date</label><input type="date" id="wDate"></div>
+            <div class="field"><label>Weight (kg)</label><input type="number" step="0.1" min="0" id="wValue" placeholder="e.g. 62.5"></div>
+          </div>
+          <div class="field"><label>Note (optional)</label><input type="text" id="wNote" placeholder="e.g. Dr visit — BP normal"></div>
+          <div class="form-actions"><button class="btn primary" id="wAddBtn">Add entry</button></div>
+        </div>
+
+        <div class="weight-list" id="weightList"></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <div class="toast" id="toast"></div>
@@ -333,6 +446,7 @@
     <button id="navToday" class="active">Today</button>
     <button id="navMaster">Master</button>
     <button id="navHistory">History</button>
+    <button id="navMilestones">Milestones</button>
   </div>
 </div>
 
@@ -352,11 +466,67 @@
   var EXPIRY_WARN_DAYS = 14;
   var SNOOZE_MIN = 15;
 
+  /* India ANC milestone schedule, expressed as days since LMP (0 = LMP day) */
+  var MILESTONES = [
+    {key:'booking',  label:'Pregnancy confirmation & first ANC visit', dayStart:35,  dayEnd:56,  note:'Register at a clinic/hospital and start folic acid if you haven\'t already.'},
+    {key:'dating',   label:'Dating / viability scan',                  dayStart:42,  dayEnd:63,  note:'Confirms the due date and that the pregnancy is progressing normally.'},
+    {key:'nt',       label:'NT scan & Double Marker test',              dayStart:77,  dayEnd:97,  note:'First-trimester screening for chromosomal risk (11–13w6d).'},
+    {key:'tt1',      label:'TT / Tdap injection — 1st dose',            dayStart:84,  dayEnd:112, note:'Tetanus toxoid vaccination.'},
+    {key:'anomaly',  label:'Anomaly scan (Level II / TIFFA)',           dayStart:126, dayEnd:154, note:'Detailed scan checking the baby\'s organs and development.'},
+    {key:'tt2',      label:'TT / Tdap injection — 2nd dose',            dayStart:140, dayEnd:168, note:'Booster dose, usually 4 weeks after the first.'},
+    {key:'gtt',      label:'Glucose tolerance test (GTT / OGTT)',       dayStart:168, dayEnd:196, note:'Screens for gestational diabetes.'},
+    {key:'growth1',  label:'Growth & wellbeing scan',                   dayStart:196, dayEnd:224, note:'Checks the baby\'s growth, position, and fluid levels.'},
+    {key:'growth2',  label:'Third-trimester scan (growth + Doppler)',   dayStart:224, dayEnd:238, note:'Assesses blood flow and growth as term approaches.'},
+    {key:'weekly',   label:'Weekly check-ups begin',                    dayStart:252, dayEnd:258, note:'Most doctors in India shift to weekly visits from here.'},
+    {key:'term',     label:'Full term begins',                          dayStart:259, dayEnd:265, note:'Baby is considered full-term from this week.'},
+    {key:'edd',      label:'Expected Date of Delivery',                 dayStart:280, dayEnd:280, note:'Your estimated due date.'}
+  ];
+
   /* ---------------- storage (localStorage, offline) ---------------- */
   function todayKey(d){
     d = d || new Date();
     var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
     return y+'-'+m+'-'+day;
+  }
+  function addDaysKey(dateStr, days){
+    var d = new Date(dateStr+'T00:00:00');
+    d.setDate(d.getDate()+days);
+    return todayKey(d);
+  }
+  function diffDaysKey(dateStrA, dateStrB){
+    var a = new Date(dateStrA+'T00:00:00'), b = new Date(dateStrB+'T00:00:00');
+    return Math.round((a-b)/86400000);
+  }
+  function formatDateNice(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
+  }
+  function loadPregnancy(){
+    try{ return JSON.parse(localStorage.getItem('tm_pregnancy')||'null'); }catch(e){ return null; }
+  }
+  function savePregnancy(p){
+    try{ localStorage.setItem('tm_pregnancy', JSON.stringify(p)); }catch(e){}
+  }
+  function clearPregnancy(){
+    try{ localStorage.removeItem('tm_pregnancy'); localStorage.removeItem('tm_milestone_overrides'); }catch(e){}
+  }
+  function loadMilestoneOverrides(){
+    try{ return JSON.parse(localStorage.getItem('tm_milestone_overrides')||'{}'); }catch(e){ return {}; }
+  }
+  function saveMilestoneOverrides(o){
+    try{ localStorage.setItem('tm_milestone_overrides', JSON.stringify(o)); }catch(e){}
+  }
+  function computePregnancy(mode, inputDate){
+    var lmp, edd;
+    if(mode === 'lmp'){ lmp = inputDate; edd = addDaysKey(inputDate, 280); }
+    else { edd = inputDate; lmp = addDaysKey(inputDate, -280); }
+    return {mode:mode, inputDate:inputDate, lmp:lmp, edd:edd};
+  }
+  function loadWeights(){
+    try{ return JSON.parse(localStorage.getItem('tm_weights')||'[]'); }catch(e){ return []; }
+  }
+  function saveWeights(list){
+    try{ localStorage.setItem('tm_weights', JSON.stringify(list)); }catch(e){}
   }
   function loadTablets(){
     try{ return JSON.parse(localStorage.getItem('tm_tablets')||'[]'); }catch(e){ return []; }
@@ -440,6 +610,20 @@
   function removeAlerted(id){
     var idx = alertedIds.indexOf(id);
     if(idx !== -1){ alertedIds.splice(idx,1); saveAlerted(currentDateKey, alertedIds); }
+  }
+
+  /* ---------------- shared stock pool (same tablet name = same count) ---------------- */
+  function nameKey(name){ return (name||'').trim().toLowerCase(); }
+  function syncStockByName(name, newStock){
+    var key = nameKey(name);
+    tablets.forEach(function(t){
+      if(nameKey(t.name) === key) t.stock = newStock;
+    });
+  }
+  function findSharedStock(name){
+    var key = nameKey(name);
+    var match = tablets.filter(function(t){ return nameKey(t.name) === key && t.stock != null; })[0];
+    return match ? match.stock : null;
   }
 
   /* ---------------- alerts: sound, vibration, notification ---------------- */
@@ -648,7 +832,7 @@
     if(t && t.stock != null && t.stock !== ''){
       var stock = Number(t.stock);
       stock = wasTaken ? stock+1 : Math.max(0, stock-1);
-      t.stock = stock;
+      syncStockByName(t.name, stock);
       saveTablets(tablets);
     }
     renderToday();
@@ -713,16 +897,25 @@
     renderToday();
   }
 
-  /* ---------------- export / import ---------------- */
+  /* ---------------- export / import (full backup: tablets + pregnancy + milestones + weights) ---------------- */
   function exportTablets(){
-    if(tablets.length === 0){ showToast('No tablets to export yet'); return; }
-    var blob = new Blob([JSON.stringify(tablets, null, 2)], {type:'application/json'});
+    var hasAnything = tablets.length > 0 || !!loadPregnancy() || loadWeights().length > 0;
+    if(!hasAnything){ showToast('Nothing to export yet'); return; }
+    var bundle = {
+      version: 2,
+      exportedAt: Date.now(),
+      tablets: tablets,
+      pregnancy: loadPregnancy(),
+      milestoneOverrides: loadMilestoneOverrides(),
+      weights: loadWeights()
+    };
+    var blob = new Blob([JSON.stringify(bundle, null, 2)], {type:'application/json'});
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url; a.download = 'tablet-master-backup.json';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function(){ URL.revokeObjectURL(url); }, 3000);
-    showToast('Exported '+tablets.length+' tablet'+(tablets.length===1?'':'s'));
+    showToast('Backup exported');
   }
   function isDuplicate(candidate){
     var name = (candidate.name||'').trim().toLowerCase();
@@ -736,11 +929,29 @@
       var data;
       try{ data = JSON.parse(reader.result); }
       catch(e){ showToast('That file is not valid JSON'); return; }
-      if(!Array.isArray(data)){ showToast('Expected a list of tablets in that file'); return; }
+
+      var importedTablets, importedPregnancy = null, importedOverrides = null, importedWeights = null;
+      if(Array.isArray(data)){
+        importedTablets = data;
+      } else if(data && Array.isArray(data.tablets)){
+        importedTablets = data.tablets;
+        importedPregnancy = data.pregnancy || null;
+        importedOverrides = data.milestoneOverrides || null;
+        importedWeights = data.weights || null;
+      } else {
+        showToast('That file doesn\'t look like a Tablet Master backup');
+        return;
+      }
+
       var added = 0, skipped = 0;
-      data.forEach(function(item){
+      importedTablets.forEach(function(item){
         if(!item || !item.name || !item.slot || !item.time){ skipped++; return; }
         if(isDuplicate(item)){ skipped++; return; }
+        var stockVal = (item.stock !== undefined && item.stock !== null && item.stock !== '') ? Number(item.stock) : null;
+        if(stockVal === null){
+          var inherited = findSharedStock(item.name);
+          if(inherited != null) stockVal = inherited;
+        }
         tablets.push({
           id: uid(),
           name: String(item.name).trim(),
@@ -748,16 +959,51 @@
           slot: SLOTS.some(function(s){return s.key===item.slot;}) ? item.slot : 'morning',
           food: FOOD[item.food] ? item.food : 'after',
           time: /^\d{2}:\d{2}$/.test(item.time) ? item.time : '08:00',
-          stock: (item.stock !== undefined && item.stock !== null && item.stock !== '') ? Number(item.stock) : null,
+          stock: stockVal,
           expiry: item.expiry || item.expiryDate || null,
           createdAt: Date.now()
         });
+        if(stockVal != null) syncStockByName(item.name, stockVal);
         added++;
       });
       saveTablets(tablets);
+
+      var extras = [];
+      if(importedPregnancy && !loadPregnancy()){
+        savePregnancy(importedPregnancy);
+        extras.push('pregnancy dates');
+      }
+      if(importedOverrides){
+        var curOverrides = loadMilestoneOverrides();
+        Object.keys(importedOverrides).forEach(function(k){
+          if(!(k in curOverrides)) curOverrides[k] = importedOverrides[k];
+        });
+        saveMilestoneOverrides(curOverrides);
+      }
+      if(importedWeights && importedWeights.length){
+        var curWeights = loadWeights();
+        var existingKeys = curWeights.map(function(w){ return w.date+'|'+w.weight; });
+        var addedWeights = 0;
+        importedWeights.forEach(function(w){
+          if(!w || !w.date || w.weight == null) return;
+          var key = w.date+'|'+w.weight;
+          if(existingKeys.indexOf(key) === -1){
+            curWeights.push({id: uid(), date: w.date, weight: Number(w.weight), note: w.note || ''});
+            existingKeys.push(key);
+            addedWeights++;
+          }
+        });
+        if(addedWeights){ saveWeights(curWeights); extras.push(addedWeights+' weight entr'+(addedWeights===1?'y':'ies')); }
+      }
+
       renderMaster();
       renderToday();
-      showToast('Imported '+added+' tablet'+(added===1?'':'s')+(skipped ? ', skipped '+skipped+' (duplicate or invalid)' : ''));
+      renderPregnancyCard();
+      renderMilestones();
+
+      var msg = 'Imported '+added+' tablet'+(added===1?'':'s')+(skipped ? ', skipped '+skipped+' (duplicate or invalid)' : '');
+      if(extras.length) msg += ' · also restored '+extras.join(', ');
+      showToast(msg);
     };
     reader.onerror = function(){ showToast('Could not read that file'); };
     reader.readAsText(file);
@@ -859,11 +1105,17 @@
         t.name = data.name; t.dosage = data.dosage; t.slot = data.slot; t.food = data.food;
         t.time = data.time; t.stock = data.stock; t.expiry = data.expiry;
       }
+      if(data.stock != null) syncStockByName(data.name, data.stock);
       showToast('Tablet updated');
     } else {
+      if(data.stock === null){
+        var inherited = findSharedStock(data.name);
+        if(inherited != null) data.stock = inherited;
+      }
       data.id = uid();
       data.createdAt = Date.now();
       tablets.push(data);
+      if(data.stock != null) syncStockByName(data.name, data.stock);
     }
     saveTablets(tablets);
     closeForm();
@@ -962,14 +1214,256 @@
     renderCalendar();
   });
 
+  /* ---------------- pregnancy tracking (Tablet Master card) ---------------- */
+  var pregModeState = 'lmp';
+  document.getElementById('pregMode').querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('pregMode').querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      pregModeState = btn.dataset.val;
+      document.getElementById('pregDateLabel').textContent = pregModeState==='lmp' ? 'Last menstrual period date' : 'Expected due date (EDD)';
+    });
+  });
+
+  function renderPregnancyCard(){
+    var preg = loadPregnancy();
+    var setup = document.getElementById('pregSetup');
+    var saved = document.getElementById('pregSaved');
+    if(!preg){
+      setup.classList.remove('hidden');
+      saved.classList.add('hidden');
+      return;
+    }
+    setup.classList.add('hidden');
+    saved.classList.remove('hidden');
+    var daysPregnant = diffDaysKey(todayKey(), preg.lmp);
+    var text = 'LMP '+formatDateNice(preg.lmp)+'  →  EDD '+formatDateNice(preg.edd);
+    if(daysPregnant >= 0){
+      var weeks = Math.floor(daysPregnant/7), days = daysPregnant%7;
+      text += '  ·  '+weeks+'w '+days+'d today';
+    } else {
+      text += '  ·  starts in '+(-daysPregnant)+' day'+(daysPregnant===-1?'':'s');
+    }
+    document.getElementById('pregSavedText').textContent = text;
+  }
+
+  document.getElementById('pregSaveBtn').addEventListener('click', function(){
+    var dateVal = document.getElementById('pregDateInput').value;
+    if(!dateVal){ showToast('Pick a date first'); return; }
+    var preg = computePregnancy(pregModeState, dateVal);
+    savePregnancy(preg);
+    renderPregnancyCard();
+    renderMilestones();
+    showToast('Milestones calculated');
+  });
+  document.getElementById('pregEditBtn').addEventListener('click', function(){
+    var preg = loadPregnancy();
+    if(!preg) return;
+    pregModeState = preg.mode;
+    document.getElementById('pregMode').querySelectorAll('button').forEach(function(b){
+      b.classList.toggle('active', b.dataset.val === preg.mode);
+    });
+    document.getElementById('pregDateLabel').textContent = preg.mode==='lmp' ? 'Last menstrual period date' : 'Expected due date (EDD)';
+    document.getElementById('pregDateInput').value = preg.inputDate;
+    document.getElementById('pregSetup').classList.remove('hidden');
+    document.getElementById('pregSaved').classList.add('hidden');
+  });
+  document.getElementById('pregClearBtn').addEventListener('click', function(){
+    if(!confirm('Clear your pregnancy dates and milestone progress? This cannot be undone.')) return;
+    clearPregnancy();
+    document.getElementById('pregDateInput').value = '';
+    renderPregnancyCard();
+    renderMilestones();
+    showToast('Cleared');
+  });
+
+  /* ---------------- milestones view ---------------- */
+  function isMilestoneAutoComplete(m, preg){
+    var endDate = addDaysKey(preg.lmp, m.dayEnd);
+    return todayKey() > endDate;
+  }
+  function isMilestoneDone(m, preg, overrides){
+    return (m.key in overrides) ? overrides[m.key] : isMilestoneAutoComplete(m, preg);
+  }
+  function toggleMilestone(key){
+    var preg = loadPregnancy();
+    if(!preg) return;
+    var m = MILESTONES.filter(function(x){ return x.key===key; })[0];
+    if(!m) return;
+    var overrides = loadMilestoneOverrides();
+    var current = isMilestoneDone(m, preg, overrides);
+    overrides[key] = !current;
+    saveMilestoneOverrides(overrides);
+    renderMilestones();
+  }
+
+  function renderMilestones(){
+    var preg = loadPregnancy();
+    var notSet = document.getElementById('mileNotSet');
+    var content = document.getElementById('mileContent');
+    if(!preg){
+      notSet.classList.remove('hidden');
+      content.classList.add('hidden');
+      return;
+    }
+    notSet.classList.add('hidden');
+    content.classList.remove('hidden');
+
+    var overrides = loadMilestoneOverrides();
+    var todayStr = todayKey();
+    var daysPregnant = diffDaysKey(todayStr, preg.lmp);
+    var doneCount = MILESTONES.filter(function(m){ return isMilestoneDone(m, preg, overrides); }).length;
+
+    var bigText;
+    if(daysPregnant >= 0){
+      var weeks = Math.floor(daysPregnant/7), days = daysPregnant%7;
+      bigText = weeks+' weeks '+days+' days pregnant';
+    } else {
+      bigText = 'Starts in '+(-daysPregnant)+' day'+(daysPregnant===-1?'':'s');
+    }
+    document.getElementById('mileSummaryBig').textContent = bigText;
+    document.getElementById('mileSummarySmall').textContent =
+      'Due '+formatDateNice(preg.edd)+'  ·  '+doneCount+' of '+MILESTONES.length+' milestones complete';
+
+    var list = document.getElementById('mileList');
+    list.innerHTML = MILESTONES.map(function(m){
+      var startDate = addDaysKey(preg.lmp, m.dayStart);
+      var endDate = addDaysKey(preg.lmp, m.dayEnd);
+      var done = isMilestoneDone(m, preg, overrides);
+      var statusClass, statusText;
+      if(done){ statusClass='done'; statusText='Completed'; }
+      else if(todayStr >= startDate && todayStr <= endDate){ statusClass='duenow'; statusText='Due now'; }
+      else { statusClass='upcoming'; statusText='Upcoming'; }
+      var dateLabel = (m.dayStart === m.dayEnd) ? formatDateNice(startDate) : (formatDateNice(startDate)+' – '+formatDateNice(endDate));
+      return (
+        '<div class="mile-card '+statusClass+'">' +
+          '<button class="check'+(done?' on':'')+'" data-mkey="'+m.key+'">'+(done?'✓':'')+'</button>' +
+          '<div class="mile-info">' +
+            '<p class="mile-name">'+m.label+'</p>' +
+            '<div class="mile-meta">' +
+              '<span class="mile-date">'+dateLabel+'</span>' +
+              '<span class="mile-status '+statusClass+'">'+statusText+'</span>' +
+            '</div>' +
+            '<p class="mile-note">'+m.note+'</p>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+    list.querySelectorAll('.check').forEach(function(btn){
+      btn.addEventListener('click', function(){ toggleMilestone(btn.dataset.mkey); });
+    });
+    renderWeightSection();
+  }
+  document.getElementById('mileGoSetup').addEventListener('click', function(){
+    showView('master');
+    document.getElementById('pregCard').scrollIntoView({behavior:'smooth', block:'start'});
+  });
+
+  /* ---------------- weight tracking ---------------- */
+  function formatDateShort(dateStr){
+    var d = new Date(dateStr+'T00:00:00');
+    return d.toLocaleDateString(undefined,{day:'numeric',month:'short'});
+  }
+  function drawWeightChart(entries){
+    var svg = document.getElementById('weightChart');
+    var W=320, H=140, padL=32, padR=10, padT=14, padB=22;
+    var values = entries.map(function(e){ return e.weight; });
+    var minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
+    if(minV === maxV){ minV -= 1; maxV += 1; }
+    var rangePad = (maxV-minV)*0.15;
+    minV -= rangePad; maxV += rangePad;
+
+    function xFor(i){ return padL + (W-padL-padR) * (entries.length===1 ? 0 : (i/(entries.length-1))); }
+    function yFor(v){ return H-padB - (H-padT-padB) * ((v-minV)/(maxV-minV)); }
+
+    var mintColor = getComputedStyle(document.documentElement).getPropertyValue('--mint').trim() || '#5EEAD4';
+    var lineColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#86A69C';
+
+    var pts = entries.map(function(e,i){ return xFor(i)+','+yFor(e.weight); }).join(' ');
+    var svgHtml = '';
+    [minV, (minV+maxV)/2, maxV].forEach(function(v){
+      var y = yFor(v);
+      svgHtml += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="'+lineColor+'" stroke-opacity="0.15" stroke-width="1"/>';
+      svgHtml += '<text x="2" y="'+(y+3)+'" font-size="9" fill="'+lineColor+'">'+v.toFixed(1)+'</text>';
+    });
+    svgHtml += '<polyline points="'+pts+'" fill="none" stroke="'+mintColor+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+    entries.forEach(function(e,i){
+      svgHtml += '<circle cx="'+xFor(i)+'" cy="'+yFor(e.weight)+'" r="3.5" fill="'+mintColor+'"/>';
+    });
+    svgHtml += '<text x="'+xFor(0)+'" y="'+(H-6)+'" font-size="9" fill="'+lineColor+'" text-anchor="start">'+formatDateShort(entries[0].date)+'</text>';
+    svgHtml += '<text x="'+xFor(entries.length-1)+'" y="'+(H-6)+'" font-size="9" fill="'+lineColor+'" text-anchor="end">'+formatDateShort(entries[entries.length-1].date)+'</text>';
+
+    svg.setAttribute('viewBox','0 0 '+W+' '+H);
+    svg.innerHTML = svgHtml;
+  }
+  function renderWeightSection(){
+    var entries = loadWeights().slice().sort(function(a,b){ return a.date.localeCompare(b.date); });
+    var statsEl = document.getElementById('weightStats');
+    var chartWrap = document.getElementById('weightChartWrap');
+    var emptyEl = document.getElementById('weightEmpty');
+    var listEl = document.getElementById('weightList');
+
+    if(entries.length === 0){
+      statsEl.classList.add('hidden');
+      chartWrap.classList.add('hidden');
+      emptyEl.classList.remove('hidden');
+      listEl.innerHTML = '';
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    statsEl.classList.remove('hidden');
+    var first = entries[0], last = entries[entries.length-1];
+    var gain = last.weight - first.weight;
+    statsEl.innerHTML = 'Started at <b>'+first.weight+' kg</b> → Now <b>'+last.weight+' kg</b> ('+(gain>=0?'+':'')+gain.toFixed(1)+' kg)';
+
+    if(entries.length >= 2){
+      chartWrap.classList.remove('hidden');
+      drawWeightChart(entries);
+    } else {
+      chartWrap.classList.add('hidden');
+    }
+
+    var listSorted = entries.slice().reverse();
+    listEl.innerHTML = listSorted.map(function(e){
+      return '<div class="weight-row">' +
+        '<span class="wr-date">'+formatDateNice(e.date)+'</span>' +
+        '<span class="wr-val">'+e.weight+' kg</span>' +
+        '<span class="wr-note">'+escapeHtml(e.note||'')+'</span>' +
+        '<button class="icon-btn danger" data-wid="'+e.id+'" title="Delete">✕</button>' +
+      '</div>';
+    }).join('');
+    listEl.querySelectorAll('[data-wid]').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteWeight(btn.dataset.wid); });
+    });
+  }
+  function deleteWeight(id){
+    var list = loadWeights().filter(function(w){ return w.id !== id; });
+    saveWeights(list);
+    renderWeightSection();
+  }
+  document.getElementById('wAddBtn').addEventListener('click', function(){
+    var date = document.getElementById('wDate').value || todayKey();
+    var val = document.getElementById('wValue').value;
+    if(!val || isNaN(Number(val))){ showToast('Enter a weight value'); return; }
+    var list = loadWeights();
+    list.push({id: uid(), date: date, weight: Number(val), note: document.getElementById('wNote').value.trim()});
+    saveWeights(list);
+    document.getElementById('wValue').value = '';
+    document.getElementById('wNote').value = '';
+    renderWeightSection();
+    showToast('Weight logged');
+  });
+
   /* ---------------- nav ---------------- */
   function showView(name){
     document.getElementById('todayView').classList.toggle('active', name==='today');
     document.getElementById('masterView').classList.toggle('active', name==='master');
     document.getElementById('historyView').classList.toggle('active', name==='history');
+    document.getElementById('milestonesView').classList.toggle('active', name==='milestones');
     document.getElementById('navToday').classList.toggle('active', name==='today');
     document.getElementById('navMaster').classList.toggle('active', name==='master');
     document.getElementById('navHistory').classList.toggle('active', name==='history');
+    document.getElementById('navMilestones').classList.toggle('active', name==='milestones');
     if(name==='master') closeForm();
     if(name==='history'){
       calMonth = new Date(); calMonth.setDate(1);
@@ -977,10 +1471,12 @@
       selectedDetailDate = null;
       renderCalendar();
     }
+    if(name==='milestones') renderMilestones();
   }
   document.getElementById('navToday').addEventListener('click', function(){ showView('today'); });
   document.getElementById('navMaster').addEventListener('click', function(){ showView('master'); });
   document.getElementById('navHistory').addEventListener('click', function(){ showView('history'); });
+  document.getElementById('navMilestones').addEventListener('click', function(){ showView('milestones'); });
 
   /* ---------------- clock tick: catch overdue transitions + date rollover ---------------- */
   setInterval(function(){
@@ -994,9 +1490,12 @@
   }, 30000);
 
   /* ---------------- boot ---------------- */
+  document.getElementById('wDate').value = todayKey();
   renderToday();
   renderMaster();
+  renderPregnancyCard();
 })();
 </script>
+
 </body>
 </html>
