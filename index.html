@@ -6,6 +6,8 @@
 <title>Tablet Master</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
 <style>
   :root{
     --bg:#0B1614; --surface:#13221F; --surface-2:#101C19; --line:#1E332E; --line-strong:#24403A;
@@ -140,6 +142,27 @@
   .weight-row .wr-date{color:var(--muted);flex-shrink:0;width:70px;}
   .weight-row .wr-val{font-weight:600;flex-shrink:0;width:58px;}
   .weight-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+  /* cross-device sync */
+  .io-btn.synced{color:var(--mint);border-color:var(--mint);}
+  .io-btn.sync-offline{color:var(--warn-text);border-color:var(--warn-border);}
+  .sync-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+  [data-theme="light"] .sync-overlay{background:rgba(30,26,21,0.4);}
+  .sync-overlay.hidden{display:none;}
+  .sync-modal{width:100%;max-width:480px;max-height:88vh;overflow-y:auto;background:var(--bg);border-radius:22px 22px 0 0;
+    border:1px solid var(--line-strong);border-bottom:none;padding:22px 20px 28px;}
+  .sync-modal h2{margin:0 0 6px;font-size:19px;font-weight:600;}
+  .sync-modal>p{margin:0 0 14px;font-size:13px;color:var(--muted);line-height:1.5;}
+  .sync-steps{margin:0 0 14px;padding-left:20px;font-size:12.5px;color:var(--muted);line-height:1.7;}
+  .sync-steps b{color:var(--text);}
+  .sync-steps code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:11.5px;}
+  .sync-modal textarea{width:100%;min-height:110px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;
+    padding:10px 12px;color:var(--text);font-size:12.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;}
+  .sync-modal textarea:focus{border-color:var(--mint);}
+  .sync-status-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:13px;}
+  .sync-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .sync-status-dot.on{background:var(--mint);}
+  .sync-status-dot.off{background:var(--warn-text);}
   .add-btn{width:42px;height:42px;border-radius:50%;background:var(--mint);color:var(--on-mint);border:none;cursor:pointer;
     font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .io-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--muted);
@@ -162,6 +185,8 @@
   .btn{flex:1;padding:11px;border-radius:10px;border:1px solid var(--line-strong);background:transparent;color:var(--muted);
     font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;}
   .btn.primary{background:var(--mint);color:var(--on-mint);border-color:var(--mint);}
+  .btn.danger{color:var(--danger-text);border-color:var(--danger-border);}
+  .btn.danger:hover{background:var(--danger-bg);}
   .btn:disabled{opacity:.4;cursor:not-allowed;}
 
   .tm-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
@@ -281,6 +306,7 @@
       </div>
       <div class="tm-header-actions">
         <button class="theme-toggle-btn io-btn" title="Toggle theme">🌙</button>
+        <button class="io-btn" id="syncOpenBtn" title="Cross-device sync">🔗</button>
         <button class="io-btn" id="exportBtn" title="Export tablets">⇩</button>
         <button class="io-btn" id="importBtn" title="Import tablets">⇧</button>
         <button class="add-btn" id="addTabletBtn" title="Add tablet">+</button>
@@ -450,6 +476,36 @@
   </div>
 </div>
 
+<div id="syncOverlay" class="sync-overlay hidden">
+  <div class="sync-modal">
+    <h2 class="display">Cross-device sync</h2>
+
+    <div id="syncSetupBlock">
+      <p>Connect a free Firebase Realtime Database so this data updates on both your devices automatically, in real time.</p>
+      <ol class="sync-steps">
+        <li>Go to <b>console.firebase.google.com</b> and create a free project (any name is fine)</li>
+        <li>In the left menu, open <b>Build → Realtime Database</b> → click "Create Database" → start in <b>test mode</b></li>
+        <li>Go to <b>Project settings</b> (gear icon) → scroll to "Your apps" → click the web icon <code>&lt;/&gt;</code> to register a web app</li>
+        <li>Copy the whole <code>firebaseConfig</code> object it shows you, and paste it below</li>
+      </ol>
+      <textarea id="syncConfigInput" placeholder="const firebaseConfig = {&#10;  apiKey: &quot;...&quot;,&#10;  databaseURL: &quot;https://xxx-default-rtdb.firebaseio.com&quot;,&#10;  ...&#10;};"></textarea>
+      <div class="form-actions" style="margin-top:12px;">
+        <button class="btn" id="syncCancelBtn">Not now</button>
+        <button class="btn primary" id="syncConnectBtn">Connect</button>
+      </div>
+    </div>
+
+    <div id="syncConnectedBlock" class="hidden">
+      <div class="sync-status-row"><span class="sync-status-dot" id="syncStatusDot"></span><span id="syncStatusText"></span></div>
+      <p>Paste this same config into the app on your other device (one time) to link them together. Both devices will then update live whenever either one changes something.</p>
+      <div class="form-actions">
+        <button class="btn danger" id="syncDisconnectBtn">Disconnect</button>
+        <button class="btn primary" id="syncCloseBtn">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -482,7 +538,7 @@
     {key:'edd',      label:'Expected Date of Delivery',                 dayStart:280, dayEnd:280, note:'Your estimated due date.'}
   ];
 
-  /* ---------------- storage (localStorage, offline) ---------------- */
+  /* ---------------- storage (localStorage, with optional Firebase sync) ---------------- */
   function todayKey(d){
     d = d || new Date();
     var y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
@@ -501,20 +557,65 @@
     var d = new Date(dateStr+'T00:00:00');
     return d.toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});
   }
-  function loadPregnancy(){
+
+  /* sync state */
+  var fb = null;
+  var syncEnabled = false;
+  var pregnancyCache = null;
+  var overridesCache = {};
+  var weightsCache = [];
+  var logsCache_ = {};
+  var alertedCache_ = {};
+
+  /* strictly-local readers, used for one-time migration when connecting sync */
+  function loadPregnancyLocal(){
     try{ return JSON.parse(localStorage.getItem('tm_pregnancy')||'null'); }catch(e){ return null; }
+  }
+  function loadMilestoneOverridesLocal(){
+    try{ return JSON.parse(localStorage.getItem('tm_milestone_overrides')||'{}'); }catch(e){ return {}; }
+  }
+  function loadWeightsLocal(){
+    try{ return JSON.parse(localStorage.getItem('tm_weights')||'[]'); }catch(e){ return []; }
+  }
+  function loadAllLocalLogs(){
+    var out = {};
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf('tm_log_')===0){
+        try{ out[k.slice(7)] = JSON.parse(localStorage.getItem(k)); }catch(e){}
+      }
+    }
+    return out;
+  }
+  function loadAllLocalAlerted(){
+    var out = {};
+    for(var i=0;i<localStorage.length;i++){
+      var k = localStorage.key(i);
+      if(k && k.indexOf('tm_alerted_')===0){
+        try{ out[k.slice(11)] = JSON.parse(localStorage.getItem(k)); }catch(e){}
+      }
+    }
+    return out;
+  }
+
+  /* sync-aware readers used everywhere in the app */
+  function loadPregnancy(){
+    return syncEnabled ? (pregnancyCache || null) : loadPregnancyLocal();
   }
   function savePregnancy(p){
     try{ localStorage.setItem('tm_pregnancy', JSON.stringify(p)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('pregnancy').set(p);
   }
   function clearPregnancy(){
     try{ localStorage.removeItem('tm_pregnancy'); localStorage.removeItem('tm_milestone_overrides'); }catch(e){}
+    if(syncEnabled && fb){ fb.ref('pregnancy').remove(); fb.ref('milestoneOverrides').remove(); }
   }
   function loadMilestoneOverrides(){
-    try{ return JSON.parse(localStorage.getItem('tm_milestone_overrides')||'{}'); }catch(e){ return {}; }
+    return syncEnabled ? (overridesCache || {}) : loadMilestoneOverridesLocal();
   }
   function saveMilestoneOverrides(o){
     try{ localStorage.setItem('tm_milestone_overrides', JSON.stringify(o)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('milestoneOverrides').set(o);
   }
   function computePregnancy(mode, inputDate){
     var lmp, edd;
@@ -523,29 +624,36 @@
     return {mode:mode, inputDate:inputDate, lmp:lmp, edd:edd};
   }
   function loadWeights(){
-    try{ return JSON.parse(localStorage.getItem('tm_weights')||'[]'); }catch(e){ return []; }
+    return syncEnabled ? (weightsCache || []) : loadWeightsLocal();
   }
   function saveWeights(list){
     try{ localStorage.setItem('tm_weights', JSON.stringify(list)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('weights').set(list);
   }
   function loadTablets(){
     try{ return JSON.parse(localStorage.getItem('tm_tablets')||'[]'); }catch(e){ return []; }
   }
   function saveTablets(list){
     try{ localStorage.setItem('tm_tablets', JSON.stringify(list)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('tablets').set(list);
   }
   function loadLog(dateKey){
+    if(syncEnabled) return (logsCache_ && logsCache_[dateKey]) || {};
     try{ return JSON.parse(localStorage.getItem('tm_log_'+dateKey)||'{}'); }catch(e){ return {}; }
   }
-  function saveLog(dateKey, log){
-    try{ localStorage.setItem('tm_log_'+dateKey, JSON.stringify(log)); }catch(e){}
+  function saveLog(dateKey, logObj){
+    try{ localStorage.setItem('tm_log_'+dateKey, JSON.stringify(logObj)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('logs/'+dateKey).set(logObj);
   }
   function loadAlerted(dateKey){
+    if(syncEnabled) return (alertedCache_ && alertedCache_[dateKey]) || [];
     try{ return JSON.parse(localStorage.getItem('tm_alerted_'+dateKey)||'[]'); }catch(e){ return []; }
   }
   function saveAlerted(dateKey, arr){
     try{ localStorage.setItem('tm_alerted_'+dateKey, JSON.stringify(arr)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('alerted/'+dateKey).set(arr);
   }
+
 
   /* ---------------- state ---------------- */
   var tablets = loadTablets();
@@ -555,6 +663,7 @@
   var calMonth = new Date(); calMonth.setDate(1);
   var selectedDetailDate = null;
   var editingId = null;
+  var currentView = 'today';
 
   /* ---------------- helpers ---------------- */
   function uid(){ return 't_'+Date.now()+'_'+Math.random().toString(36).slice(2,8); }
@@ -1456,6 +1565,7 @@
 
   /* ---------------- nav ---------------- */
   function showView(name){
+    currentView = name;
     document.getElementById('todayView').classList.toggle('active', name==='today');
     document.getElementById('masterView').classList.toggle('active', name==='master');
     document.getElementById('historyView').classList.toggle('active', name==='history');
@@ -1489,11 +1599,210 @@
     renderToday();
   }, 30000);
 
+  /* ---------------- cross-device sync (Firebase Realtime Database) ---------------- */
+  function updateSyncButton(state){
+    var btn = document.getElementById('syncOpenBtn');
+    btn.classList.remove('synced','sync-offline');
+    if(state === 'connected'){ btn.classList.add('synced'); btn.title = 'Cross-device sync (connected)'; }
+    else if(state === 'offline'){ btn.classList.add('sync-offline'); btn.title = 'Cross-device sync (offline, will retry)'; }
+    else { btn.title = 'Cross-device sync'; }
+  }
+  function updateSyncModalStatus(state){
+    var dot = document.getElementById('syncStatusDot');
+    var text = document.getElementById('syncStatusText');
+    if(!dot || !text) return;
+    dot.classList.remove('on','off');
+    if(state === 'connected'){ dot.classList.add('on'); text.textContent = 'Connected — changes sync in real time.'; }
+    else { dot.classList.add('off'); text.textContent = 'Configured, but currently offline — will reconnect automatically, and local changes are queued.'; }
+  }
+
+  function parseFirebaseConfigText(text){
+    var start = text.indexOf('{');
+    var end = text.lastIndexOf('}');
+    if(start === -1 || end === -1 || end <= start) return null;
+    var objText = text.slice(start, end+1);
+    try{
+      var obj = new Function('return (' + objText + ');')();
+      if(obj && obj.databaseURL) return obj;
+      return null;
+    }catch(e){ return null; }
+  }
+
+  function seedIfEmpty(path, localValue){
+    return fb.ref(path).once('value').then(function(snap){
+      var val = snap.val();
+      if(val === null || val === undefined){
+        return fb.ref(path).set(localValue).then(function(){ return localValue; });
+      }
+      return val;
+    });
+  }
+
+  function attachOngoingListeners(){
+    fb.ref('tablets').on('value', function(snap){
+      tablets = snap.val() || [];
+      try{ localStorage.setItem('tm_tablets', JSON.stringify(tablets)); }catch(e){}
+      renderToday(); renderMaster();
+    });
+    fb.ref('pregnancy').on('value', function(snap){
+      pregnancyCache = snap.val() || null;
+      try{ localStorage.setItem('tm_pregnancy', JSON.stringify(pregnancyCache)); }catch(e){}
+      renderPregnancyCard();
+      if(currentView === 'milestones') renderMilestones();
+    });
+    fb.ref('milestoneOverrides').on('value', function(snap){
+      overridesCache = snap.val() || {};
+      try{ localStorage.setItem('tm_milestone_overrides', JSON.stringify(overridesCache)); }catch(e){}
+      if(currentView === 'milestones') renderMilestones();
+    });
+    fb.ref('weights').on('value', function(snap){
+      weightsCache = snap.val() || [];
+      try{ localStorage.setItem('tm_weights', JSON.stringify(weightsCache)); }catch(e){}
+      if(currentView === 'milestones') renderMilestones();
+    });
+    fb.ref('logs').on('value', function(snap){
+      logsCache_ = snap.val() || {};
+      try{
+        Object.keys(logsCache_).forEach(function(dk){
+          localStorage.setItem('tm_log_'+dk, JSON.stringify(logsCache_[dk]));
+        });
+      }catch(e){}
+      log = logsCache_[currentDateKey] || {};
+      renderToday();
+      if(currentView === 'history') renderCalendar();
+    });
+    fb.ref('alerted').on('value', function(snap){
+      alertedCache_ = snap.val() || {};
+      try{
+        Object.keys(alertedCache_).forEach(function(dk){
+          localStorage.setItem('tm_alerted_'+dk, JSON.stringify(alertedCache_[dk]));
+        });
+      }catch(e){}
+      alertedIds = alertedCache_[currentDateKey] || [];
+    });
+    fb.ref('.info/connected').on('value', function(snap){
+      var connected = !!snap.val();
+      updateSyncButton(connected ? 'connected' : 'offline');
+      updateSyncModalStatus(connected ? 'connected' : 'offline');
+    });
+  }
+
+  function connectSync(config){
+    try{
+      if(typeof firebase === 'undefined') throw new Error('Firebase SDK not loaded');
+      if(!firebase.apps || !firebase.apps.length){ firebase.initializeApp(config); }
+      fb = firebase.database();
+    }catch(e){
+      showToast('Could not connect — check your config and try again');
+      return;
+    }
+    try{ localStorage.setItem('tm_firebase_config', JSON.stringify(config)); }catch(e){}
+    syncEnabled = true;
+
+    var localTablets = tablets;
+    var localLogs = loadAllLocalLogs();
+    var localAlerted = loadAllLocalAlerted();
+    var localPregnancy = loadPregnancyLocal();
+    var localOverrides = loadMilestoneOverridesLocal();
+    var localWeights = loadWeightsLocal();
+
+    Promise.all([
+      seedIfEmpty('tablets', localTablets),
+      seedIfEmpty('logs', localLogs),
+      seedIfEmpty('alerted', localAlerted),
+      seedIfEmpty('pregnancy', localPregnancy),
+      seedIfEmpty('milestoneOverrides', localOverrides),
+      seedIfEmpty('weights', localWeights)
+    ]).then(function(results){
+      tablets = results[0] || [];
+      logsCache_ = results[1] || {};
+      alertedCache_ = results[2] || {};
+      pregnancyCache = results[3] || null;
+      overridesCache = results[4] || {};
+      weightsCache = results[5] || [];
+      log = logsCache_[currentDateKey] || {};
+      alertedIds = alertedCache_[currentDateKey] || [];
+
+      attachOngoingListeners();
+      updateSyncButton('connected');
+
+      document.getElementById('syncSetupBlock').classList.add('hidden');
+      document.getElementById('syncConnectedBlock').classList.remove('hidden');
+      updateSyncModalStatus('connected');
+
+      renderToday(); renderMaster(); renderPregnancyCard();
+      if(currentView === 'history') renderCalendar();
+      if(currentView === 'milestones') renderMilestones();
+      showToast('Connected — this device is now synced');
+    }).catch(function(){
+      syncEnabled = false;
+      showToast('Connection failed — double check your database rules and config');
+    });
+  }
+
+  function disconnectSync(){
+    if(fb){
+      try{
+        fb.ref('tablets').off(); fb.ref('pregnancy').off(); fb.ref('milestoneOverrides').off();
+        fb.ref('weights').off(); fb.ref('logs').off(); fb.ref('alerted').off(); fb.ref('.info/connected').off();
+      }catch(e){}
+    }
+    syncEnabled = false;
+    fb = null;
+    try{ localStorage.removeItem('tm_firebase_config'); }catch(e){}
+    updateSyncButton('none');
+    tablets = loadTablets();
+    log = loadLog(currentDateKey);
+    alertedIds = loadAlerted(currentDateKey);
+    renderToday(); renderMaster(); renderPregnancyCard();
+    document.getElementById('syncSetupBlock').classList.remove('hidden');
+    document.getElementById('syncConnectedBlock').classList.add('hidden');
+    document.getElementById('syncConfigInput').value = '';
+    showToast('Sync disconnected — back to local-only storage on this device');
+  }
+
+  document.getElementById('syncOpenBtn').addEventListener('click', function(){
+    document.getElementById('syncOverlay').classList.remove('hidden');
+    if(syncEnabled){
+      document.getElementById('syncSetupBlock').classList.add('hidden');
+      document.getElementById('syncConnectedBlock').classList.remove('hidden');
+      updateSyncModalStatus(fb ? 'connected' : 'offline');
+    } else {
+      document.getElementById('syncSetupBlock').classList.remove('hidden');
+      document.getElementById('syncConnectedBlock').classList.add('hidden');
+    }
+  });
+  document.getElementById('syncCancelBtn').addEventListener('click', function(){
+    document.getElementById('syncOverlay').classList.add('hidden');
+  });
+  document.getElementById('syncCloseBtn').addEventListener('click', function(){
+    document.getElementById('syncOverlay').classList.add('hidden');
+  });
+  document.getElementById('syncConnectBtn').addEventListener('click', function(){
+    var text = document.getElementById('syncConfigInput').value;
+    var config = parseFirebaseConfigText(text);
+    if(!config){
+      showToast('Could not read that config — make sure it includes databaseURL');
+      return;
+    }
+    connectSync(config);
+  });
+  document.getElementById('syncDisconnectBtn').addEventListener('click', function(){
+    if(!confirm('Disconnect sync? Your data stays on this device, but devices will stop updating each other.')) return;
+    disconnectSync();
+    document.getElementById('syncOverlay').classList.add('hidden');
+  });
+
   /* ---------------- boot ---------------- */
   document.getElementById('wDate').value = todayKey();
   renderToday();
   renderMaster();
   renderPregnancyCard();
+  (function autoReconnect(){
+    var saved = null;
+    try{ saved = JSON.parse(localStorage.getItem('tm_firebase_config')||'null'); }catch(e){}
+    if(saved) connectSync(saved);
+  })();
 })();
 </script>
 
