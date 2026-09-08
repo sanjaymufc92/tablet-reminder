@@ -689,12 +689,12 @@
     return Math.round((target-today)/86400000);
   }
   var toastTimer = null;
-  function showToast(msg){
+  function showToast(msg, ms){
     var t = document.getElementById('toast');
     t.textContent = msg;
     t.classList.add('show');
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 3200);
+    toastTimer = setTimeout(function(){ t.classList.remove('show'); }, ms || 3200);
   }
 
   /* ---------------- log entry helpers (taken + snooze, backward compatible) ---------------- */
@@ -1617,15 +1617,36 @@
   }
 
   function parseFirebaseConfigText(text){
-    var start = text.indexOf('{');
-    var end = text.lastIndexOf('}');
-    if(start === -1 || end === -1 || end <= start) return null;
-    var objText = text.slice(start, end+1);
+    var apiKeyIdx = text.indexOf('apiKey');
+    if(apiKeyIdx === -1){
+      return {error: 'no-apikey'};
+    }
+    var openIdx = text.lastIndexOf('{', apiKeyIdx);
+    if(openIdx === -1){
+      return {error: 'no-brace'};
+    }
+    var depth = 0, closeIdx = -1;
+    for(var i=openIdx; i<text.length; i++){
+      if(text[i] === '{') depth++;
+      else if(text[i] === '}'){ depth--; if(depth === 0){ closeIdx = i; break; } }
+    }
+    if(closeIdx === -1){
+      return {error: 'unmatched-brace'};
+    }
+    var objText = text.slice(openIdx, closeIdx+1);
+    var obj;
     try{
-      var obj = new Function('return (' + objText + ');')();
-      if(obj && obj.databaseURL) return obj;
-      return null;
-    }catch(e){ return null; }
+      obj = new Function('return (' + objText + ');')();
+    }catch(e){
+      return {error: 'parse-failed', detail: e.message};
+    }
+    if(!obj || typeof obj !== 'object' || !obj.apiKey){
+      return {error: 'no-apikey'};
+    }
+    if(!obj.databaseURL){
+      return {error: 'no-database-url'};
+    }
+    return {config: obj};
   }
 
   function seedIfEmpty(path, localValue){
@@ -1689,15 +1710,17 @@
 
   function connectSync(config){
     try{
-      if(typeof firebase === 'undefined') throw new Error('Firebase SDK not loaded');
+      if(typeof firebase === 'undefined') throw new Error('The Firebase library did not load — check your internet connection and reload the app.');
       if(!firebase.apps || !firebase.apps.length){ firebase.initializeApp(config); }
       fb = firebase.database();
     }catch(e){
-      showToast('Could not connect — check your config and try again');
+      console.error('Firebase init failed:', e);
+      showToast('Could not connect: ' + (e && e.message ? e.message : 'invalid config'));
       return;
     }
     try{ localStorage.setItem('tm_firebase_config', JSON.stringify(config)); }catch(e){}
     syncEnabled = true;
+    showToast('Connecting…');
 
     var localTablets = tablets;
     var localLogs = loadAllLocalLogs();
@@ -1734,9 +1757,16 @@
       if(currentView === 'history') renderCalendar();
       if(currentView === 'milestones') renderMilestones();
       showToast('Connected — this device is now synced');
-    }).catch(function(){
+    }).catch(function(err){
       syncEnabled = false;
-      showToast('Connection failed — double check your database rules and config');
+      fb = null;
+      console.error('Firebase sync failed:', err);
+      var detail = (err && err.message) ? err.message : 'unknown error';
+      if(/permission/i.test(detail)){
+        showToast('Connection blocked by database rules — set them to allow read/write (see instructions)');
+      } else {
+        showToast('Connection failed: ' + detail);
+      }
     });
   }
 
@@ -1780,12 +1810,23 @@
   });
   document.getElementById('syncConnectBtn').addEventListener('click', function(){
     var text = document.getElementById('syncConfigInput').value;
-    var config = parseFirebaseConfigText(text);
-    if(!config){
-      showToast('Could not read that config — make sure it includes databaseURL');
+    if(!text || !text.trim()){
+      showToast('Paste your firebaseConfig first');
       return;
     }
-    connectSync(config);
+    var result = parseFirebaseConfigText(text);
+    if(result.error){
+      var messages = {
+        'no-apikey': 'Could not find "apiKey" in what you pasted — paste the whole firebaseConfig block.',
+        'no-brace': 'Could not find the opening { of your config object.',
+        'unmatched-brace': 'The braces in your pasted text don\'t match up — try copying it again.',
+        'parse-failed': 'That config has a syntax problem: ' + (result.detail || 'could not parse it') + '.',
+        'no-database-url': 'That config has no databaseURL — make sure you created a Realtime Database (Build → Realtime Database → Create Database) before copying the config from Project Settings.'
+      };
+      showToast(messages[result.error] || 'Could not read that config', 6000);
+      return;
+    }
+    connectSync(result.config);
   });
   document.getElementById('syncDisconnectBtn').addEventListener('click', function(){
     if(!confirm('Disconnect sync? Your data stays on this device, but devices will stop updating each other.')) return;
