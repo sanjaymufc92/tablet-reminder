@@ -148,6 +148,8 @@
   .weight-stats b{color:var(--text);}
   .weight-chart-wrap{border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:10px;margin-top:14px;}
   .weight-chart-wrap svg{width:100%;height:auto;display:block;}
+  #sugarChartFilter{margin-top:14px;}
+  #sugarChartEmpty{margin-top:14px;padding:24px 16px;}
   .weight-form{margin-top:18px;border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
   .weight-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
   .weight-row{display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:9px 12px;font-size:13px;}
@@ -519,7 +521,15 @@
     </div>
 
     <div id="sugarStats" class="weight-stats hidden"></div>
+    <div class="seg" id="sugarChartFilter">
+      <button type="button" data-val="all" class="active">All</button>
+      <button type="button" data-val="fasting">Fasting</button>
+      <button type="button" data-val="post1hr">1h after meal</button>
+      <button type="button" data-val="post2hr">2h after meal</button>
+      <button type="button" data-val="random">Random</button>
+    </div>
     <div id="sugarChartWrap" class="weight-chart-wrap hidden"><svg id="sugarChart" viewBox="0 0 320 140"></svg></div>
+    <div id="sugarChartEmpty" class="empty-state hidden"></div>
     <div id="sugarEmpty" class="empty-state hidden">Log a reading to see your trend here.</div>
 
     <div class="weight-form">
@@ -1801,6 +1811,10 @@
   var SUGAR_METHOD_LABELS = {glucometer:'Glucometer', plasma:'Plasma (lab)'};
   var sugarTypeState = 'fasting';
   var sugarMethodState = 'glucometer';
+  var sugarChartFilterState = 'all';
+  function sugarTypeBucket(type){
+    return type === 'postmeal' ? 'post1hr' : type;
+  }
   function sugarStatus(entry){
     var t = SUGAR_THRESHOLDS[entry.type] || SUGAR_THRESHOLDS.random;
     if(entry.value <= t.normal) return 'normal';
@@ -1827,8 +1841,16 @@
       sugarMethodState = btn.dataset.val;
     });
   });
+  document.getElementById('sugarChartFilter').querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('sugarChartFilter').querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      sugarChartFilterState = btn.dataset.val;
+      renderSugarSection();
+    });
+  });
   function renderSugarSection(){
-    var entries = loadSugar().slice().sort(function(a,b){
+    var allEntries = loadSugar().slice().sort(function(a,b){
       var ak = a.date+'T'+(a.time||'00:00');
       var bk = b.date+'T'+(b.time||'00:00');
       if(ak !== bk) return ak.localeCompare(bk);
@@ -1836,40 +1858,60 @@
     });
     var statsEl = document.getElementById('sugarStats');
     var chartWrap = document.getElementById('sugarChartWrap');
+    var chartEmptyEl = document.getElementById('sugarChartEmpty');
+    var filterEl = document.getElementById('sugarChartFilter');
     var emptyEl = document.getElementById('sugarEmpty');
     var listEl = document.getElementById('sugarList');
 
-    if(entries.length === 0){
+    if(allEntries.length === 0){
       statsEl.classList.add('hidden');
       chartWrap.classList.add('hidden');
+      chartEmptyEl.classList.add('hidden');
+      filterEl.classList.add('hidden');
       emptyEl.classList.remove('hidden');
       listEl.innerHTML = '';
       return;
     }
     emptyEl.classList.add('hidden');
-    statsEl.classList.remove('hidden');
-    var last = entries[entries.length-1];
-    var avg = entries.reduce(function(s,e){ return s+e.value; }, 0) / entries.length;
-    var highCount = entries.filter(function(e){ return sugarStatus(e) === 'high'; }).length;
-    var borderlineCount = entries.filter(function(e){ return sugarStatus(e) === 'borderline'; }).length;
-    var flagParts = [];
-    if(highCount) flagParts.push(highCount+' high');
-    if(borderlineCount) flagParts.push(borderlineCount+' borderline');
-    statsEl.innerHTML = 'Last: <b>'+last.value+' mg/dL</b> ('+SUGAR_TYPE_LABELS[last.type]+') · Average <b>'+avg.toFixed(0)+' mg/dL</b> over '+entries.length+' reading'+(entries.length===1?'':'s')+(flagParts.length ? ' · '+flagParts.join(', ') : '');
+    filterEl.classList.remove('hidden');
 
-    if(entries.length >= 2){
-      chartWrap.classList.remove('hidden');
-      drawTrendChart(document.getElementById('sugarChart'), entries, function(e){ return e.value; }, function(v){ return v.toFixed(0); }, function(e){
-        var color = getComputedStyle(document.documentElement).getPropertyValue(sugarStatusColorVar(sugarStatus(e))).trim();
-        return color;
-      });
-    } else {
+    var filter = sugarChartFilterState;
+    var filteredEntries = filter === 'all' ? allEntries : allEntries.filter(function(e){ return sugarTypeBucket(e.type) === filter; });
+
+    if(filteredEntries.length === 0){
+      statsEl.classList.add('hidden');
       chartWrap.classList.add('hidden');
+      chartEmptyEl.classList.remove('hidden');
+      chartEmptyEl.textContent = 'No '+SUGAR_TYPE_LABELS[filter]+' readings logged yet.';
+    } else {
+      statsEl.classList.remove('hidden');
+      var last = filteredEntries[filteredEntries.length-1];
+      var avg = filteredEntries.reduce(function(s,e){ return s+e.value; }, 0) / filteredEntries.length;
+      var highCount = filteredEntries.filter(function(e){ return sugarStatus(e) === 'high'; }).length;
+      var borderlineCount = filteredEntries.filter(function(e){ return sugarStatus(e) === 'borderline'; }).length;
+      var flagParts = [];
+      if(highCount) flagParts.push(highCount+' high');
+      if(borderlineCount) flagParts.push(borderlineCount+' borderline');
+      var filterLabel = filter === 'all' ? '' : ' ('+SUGAR_TYPE_LABELS[filter]+' only)';
+      statsEl.innerHTML = 'Last: <b>'+last.value+' mg/dL</b> ('+SUGAR_TYPE_LABELS[last.type]+') · Average <b>'+avg.toFixed(0)+' mg/dL</b> over '+filteredEntries.length+' reading'+(filteredEntries.length===1?'':'s')+filterLabel+(flagParts.length ? ' · '+flagParts.join(', ') : '');
+
+      if(filteredEntries.length >= 2){
+        chartWrap.classList.remove('hidden');
+        chartEmptyEl.classList.add('hidden');
+        drawTrendChart(document.getElementById('sugarChart'), filteredEntries, function(e){ return e.value; }, function(v){ return v.toFixed(0); }, function(e){
+          var color = getComputedStyle(document.documentElement).getPropertyValue(sugarStatusColorVar(sugarStatus(e))).trim();
+          return color;
+        });
+      } else {
+        chartWrap.classList.add('hidden');
+        chartEmptyEl.classList.remove('hidden');
+        chartEmptyEl.textContent = 'Log one more'+(filter==='all'?'':' '+SUGAR_TYPE_LABELS[filter])+' reading to see a trend line.';
+      }
     }
 
     var grouped = {};
     var dateOrder = [];
-    entries.forEach(function(e){
+    allEntries.forEach(function(e){
       if(!grouped[e.date]){ grouped[e.date] = []; dateOrder.push(e.date); }
       grouped[e.date].push(e);
     });
