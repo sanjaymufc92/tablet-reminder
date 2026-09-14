@@ -135,9 +135,9 @@
   .mile-note{margin:6px 0 0;font-size:12px;color:var(--muted-dim);line-height:1.4;}
   .mile-completed-row{margin-top:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
   .mile-completed-row label{font-size:11.5px;color:var(--muted);white-space:nowrap;}
-  .mile-completed-row input[type=date]{flex:1;min-width:130px;max-width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line-strong);border-radius:8px;
+  .mile-completed-row input[type=date]{flex:1;min-width:130px;max-width:100%;box-sizing:border-box;overflow:hidden;background:var(--bg);border:1px solid var(--line-strong);border-radius:8px;
     padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;}
-  .mile-completed-row input[type=date]::-webkit-date-and-time-value{width:100%;min-width:100%;text-align:left;}
+  .mile-completed-row input[type=date]::-webkit-date-and-time-value{text-align:left;}
   .mile-completed-row input[type=date]:focus{border-color:var(--mint-text);}
   .mile-date-clear{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1px solid var(--line-strong);background:transparent;
     color:var(--muted);font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;}
@@ -156,10 +156,12 @@
   .weight-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
   /* sugar tracking */
-  .sugar-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-radius:12px;border:1px solid var(--line);
-    background:var(--surface);padding:9px 12px;font-size:13px;}
-  .sugar-row .wr-date{color:var(--muted);flex-shrink:0;}
-  .sugar-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sugar-day-card{border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:12px 14px;}
+  .sugar-day-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.02em;margin-bottom:2px;}
+  .sugar-entry-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:9px 0;font-size:13px;border-top:1px solid var(--line);}
+  .sugar-day-title + .sugar-entry-row{border-top:none;padding-top:6px;}
+  .sugar-entry-time{color:var(--muted);font-size:12px;flex-shrink:0;}
+  .sugar-entry-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .sugar-note{margin-top:20px;font-size:12px;color:var(--muted-dim);line-height:1.5;}
   .wr-val.status-normal{color:var(--mint-text);}
   .wr-val.status-borderline{color:var(--warn-text);}
@@ -197,9 +199,9 @@
   .field{width:100%;min-width:0;}
   .field input[type=text],.field input[type=time],.field input[type=number],.field input[type=date]{width:100%;max-width:100%;
     min-width:0;-webkit-min-logical-width:0;box-sizing:border-box;background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;
-    padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;}
+    padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;overflow:hidden;}
   .field input[type=date]::-webkit-date-and-time-value,
-  .field input[type=time]::-webkit-date-and-time-value{width:100%;min-width:100%;text-align:left;}
+  .field input[type=time]::-webkit-date-and-time-value{text-align:left;}
   .field input:focus{border-color:var(--mint-text);}
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;min-width:0;}
@@ -1865,19 +1867,32 @@
       chartWrap.classList.add('hidden');
     }
 
-    var listSorted = entries.slice().reverse();
-    listEl.innerHTML = listSorted.map(function(e){
-      var status = sugarStatus(e);
-      var method = SUGAR_METHOD_LABELS[e.method] || SUGAR_METHOD_LABELS.glucometer;
-      var dateLabel = formatDateNice(e.date) + (e.time ? ' · '+formatTime(e.time) : '');
-      return '<div class="sugar-row">' +
-        '<span class="wr-date">'+dateLabel+'</span>' +
-        '<span class="wr-val status-'+status+'">'+e.value+' mg/dL</span>' +
-        '<span class="tag any">'+SUGAR_TYPE_LABELS[e.type]+'</span>' +
-        '<span class="tag any">'+method+'</span>' +
-        '<span class="tag '+status+'">'+sugarStatusLabel(status)+'</span>' +
-        (e.note ? '<span class="wr-note">'+escapeHtml(e.note)+'</span>' : '') +
-        '<button class="icon-btn danger" data-sid="'+e.id+'" title="Delete">✕</button>' +
+    var grouped = {};
+    var dateOrder = [];
+    entries.forEach(function(e){
+      if(!grouped[e.date]){ grouped[e.date] = []; dateOrder.push(e.date); }
+      grouped[e.date].push(e);
+    });
+    dateOrder.reverse();
+
+    listEl.innerHTML = dateOrder.map(function(dateStr){
+      var dayEntries = grouped[dateStr].slice().reverse();
+      var rowsHtml = dayEntries.map(function(e){
+        var status = sugarStatus(e);
+        var method = SUGAR_METHOD_LABELS[e.method] || SUGAR_METHOD_LABELS.glucometer;
+        return '<div class="sugar-entry-row">' +
+          '<span class="wr-val status-'+status+'">'+e.value+' mg/dL</span>' +
+          (e.time ? '<span class="sugar-entry-time">'+formatTime(e.time)+'</span>' : '') +
+          '<span class="tag any">'+SUGAR_TYPE_LABELS[e.type]+'</span>' +
+          '<span class="tag any">'+method+'</span>' +
+          '<span class="tag '+status+'">'+sugarStatusLabel(status)+'</span>' +
+          (e.note ? '<span class="wr-note">'+escapeHtml(e.note)+'</span>' : '') +
+          '<button class="icon-btn danger" data-sid="'+e.id+'" title="Delete">✕</button>' +
+        '</div>';
+      }).join('');
+      return '<div class="sugar-day-card">' +
+        '<div class="sugar-day-title">'+formatDateNice(dateStr)+'</div>' +
+        rowsHtml +
       '</div>';
     }).join('');
     listEl.querySelectorAll('[data-sid]').forEach(function(btn){
