@@ -13,6 +13,7 @@
     --bg:#0B1614; --surface:#13221F; --surface-2:#101C19; --line:#1E332E; --line-strong:#24403A;
     --text:#EAF3F0; --muted:#86A69C; --muted-dim:#4A6058;
     --mint:#5EEAD4; --coral:#FF6B5B; --amber:#F5B942; --lavender:#B9A6FF;
+    --mint-text:#5EEAD4; --amber-text:#F5B942; --lavender-text:#B9A6FF;
     --on-mint:#0B1614;
     --danger-bg:#18100E; --danger-border:#5A2D26; --danger-text:#FF9A8C;
     --warn-bg:#241D0E; --warn-border:#4A3E22; --warn-text:#F5B942;
@@ -20,6 +21,7 @@
   [data-theme="light"]{
     --bg:#F6F1E6; --surface:#FFFFFF; --surface-2:#EFE8D8; --line:#E3DAC5; --line-strong:#D3C7A9;
     --text:#1E1A15; --muted:#6B6153; --muted-dim:#9C917C;
+    --mint-text:#0F766E; --amber-text:#92400E; --lavender-text:#6D28D9;
     --danger-bg:#FDEEEA; --danger-border:#F0B7A8; --danger-text:#B5473A;
     --warn-bg:#FCF3DC; --warn-border:#E9CB86; --warn-text:#8C6D1F;
   }
@@ -42,22 +44,22 @@
   /* banners */
   .banner{margin-top:18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--danger-bg);
     border:1px solid var(--danger-border);color:var(--danger-text);border-radius:16px;padding:12px 14px;font-size:13px;}
-  .banner .dot{width:8px;height:8px;border-radius:50%;background:var(--coral);flex-shrink:0;}
+  .banner .dot{width:8px;height:8px;border-radius:50%;background:var(--danger-text);flex-shrink:0;}
   .banner.warn{background:var(--warn-bg);border-color:var(--warn-border);color:var(--warn-text);}
-  .banner.warn .dot{background:var(--amber);}
+  .banner.warn .dot{background:var(--warn-text);}
   .banner.info{background:var(--surface-2);border-color:var(--line-strong);color:var(--text);}
   .banner-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0;}
   .mini-btn{border:1px solid var(--line-strong);background:transparent;color:var(--text);border-radius:8px;padding:6px 12px;
     font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;}
   .mini-btn.ghost{color:var(--muted);border-color:transparent;}
-  .mini-btn:hover{border-color:var(--mint);color:var(--mint);}
+  .mini-btn:hover{border-color:var(--mint-text);color:var(--mint-text);}
 
   /* timeline */
   .timeline{margin-top:26px;}
   .slot{display:flex;gap:14px;}
   .slot-rail{display:flex;flex-direction:column;align-items:center;flex-shrink:0;}
   .slot-icon{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);
-    color:var(--mint);display:flex;align-items:center;justify-content:center;font-size:15px;}
+    color:var(--mint-text);display:flex;align-items:center;justify-content:center;font-size:15px;}
   .slot-line{width:1px;flex:1;background:var(--line);min-height:20px;}
   .slot-body{flex:1;padding-bottom:22px;min-width:0;}
   .slot-title{margin:2px 0 0;font-size:15px;font-weight:600;}
@@ -73,30 +75,33 @@
   .check{width:34px;height:34px;border-radius:50%;border:2px solid #3A544D;background:transparent;flex-shrink:0;cursor:pointer;
     display:flex;align-items:center;justify-content:center;color:var(--on-mint);font-weight:700;}
   .check.on{background:var(--mint);border-color:var(--mint);}
-  .card.overdue:not(.taken) .check{border-color:var(--coral);}
+  .card.overdue:not(.taken) .check{border-color:var(--danger-text);}
   .card-info{min-width:0;flex:1;}
   .card-name{margin:0;font-size:15px;font-weight:500;}
   .card.taken .card-name{color:var(--muted);text-decoration:line-through;}
   .card-meta{margin-top:5px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
-  .time-txt{font-size:12px;color:var(--muted);}
+  .time-txt{font-size:12px;color:var(--muted);white-space:nowrap;}
   .tag{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid;white-space:nowrap;}
-  .tag.before{color:var(--amber);border-color:#4A3E22;}
-  .tag.after{color:var(--lavender);border-color:#38314F;}
+  .tag.before{color:var(--amber-text);border-color:#4A3E22;}
+  .tag.after{color:var(--lavender-text);border-color:#38314F;}
   .tag.any{color:var(--muted);border-color:var(--line-strong);}
-  .tag.stock{color:var(--amber);border-color:#4A3E22;}
+  .tag.stock{color:var(--amber-text);border-color:#4A3E22;}
   .tag.stock.low{color:var(--danger-text);border-color:var(--danger-border);}
   .tag.expiry{color:var(--danger-text);border-color:var(--danger-border);}
+  .tag.normal{color:var(--mint-text);border-color:#1E4A42;}
+  .tag.borderline{color:var(--warn-text);border-color:var(--warn-border);}
+  .tag.high{color:var(--danger-text);border-color:var(--danger-border);}
   .overdue-badge{flex-shrink:0;font-size:11px;font-weight:600;background:var(--danger-bg);color:var(--danger-text);
     padding:4px 9px;border-radius:999px;border:1px solid var(--danger-border);}
   .snooze-btn{flex-shrink:0;border:1px solid var(--line-strong);background:transparent;color:var(--muted);border-radius:999px;
     padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit;}
-  .snooze-btn:hover{border-color:var(--mint);color:var(--mint);}
+  .snooze-btn:hover{border-color:var(--mint-text);color:var(--mint-text);}
   .snoozed-note{margin-top:8px;padding-left:46px;font-size:11.5px;color:var(--muted);}
 
   .empty-state{margin-top:8px;border:1px dashed var(--line-strong);border-radius:16px;padding:34px 16px;text-align:center;color:var(--muted);}
 
   /* tablet master */
-  .tm-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
+  .tm-header{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:space-between;gap:10px;}
   .tm-header h1{margin:0;font-size:24px;font-weight:600;}
   .tm-header p{margin:4px 0 0;font-size:13px;color:var(--muted);}
   .tm-header-actions{display:flex;gap:8px;flex-shrink:0;}
@@ -126,25 +131,38 @@
   .mile-status{font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid;}
   .mile-status.upcoming{color:var(--muted);border-color:var(--line-strong);}
   .mile-status.duenow{color:var(--warn-text);border-color:var(--warn-border);}
-  .mile-status.done{color:var(--mint);border-color:#1E4A42;}
+  .mile-status.done{color:var(--mint-text);border-color:#1E4A42;}
   .mile-note{margin:6px 0 0;font-size:12px;color:var(--muted-dim);line-height:1.4;}
+  .mile-completed-row{margin-top:10px;display:flex;align-items:center;gap:8px;}
+  .mile-completed-row label{font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .mile-completed-row input[type=date]{background:var(--bg);border:1px solid var(--line-strong);border-radius:8px;
+    padding:5px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;}
+  .mile-completed-row input[type=date]:focus{border-color:var(--mint-text);}
 
   /* weight tracking */
-  .weight-section{margin-top:26px;padding-top:20px;border-top:1px solid var(--line);}
-  .weight-title{font-size:16px;font-weight:600;margin:0 0 12px;}
-  .weight-stats{font-size:13px;color:var(--muted);margin-bottom:12px;}
+  .weight-stats{margin-top:18px;font-size:13px;color:var(--muted);}
   .weight-stats b{color:var(--text);}
-  .weight-chart-wrap{border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:10px;margin-bottom:14px;}
+  .weight-chart-wrap{border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:10px;margin-top:14px;}
   .weight-chart-wrap svg{width:100%;height:auto;display:block;}
-  .weight-form{border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
+  .weight-form{margin-top:18px;border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:14px 16px;display:flex;flex-direction:column;gap:12px;}
   .weight-list{margin-top:14px;display:flex;flex-direction:column;gap:8px;}
   .weight-row{display:flex;align-items:center;gap:10px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:9px 12px;font-size:13px;}
   .weight-row .wr-date{color:var(--muted);flex-shrink:0;width:70px;}
   .weight-row .wr-val{font-weight:600;flex-shrink:0;width:58px;}
   .weight-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
+  /* sugar tracking */
+  .sugar-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;border-radius:12px;border:1px solid var(--line);
+    background:var(--surface);padding:9px 12px;font-size:13px;}
+  .sugar-row .wr-date{color:var(--muted);flex-shrink:0;}
+  .sugar-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .sugar-note{margin-top:20px;font-size:12px;color:var(--muted-dim);line-height:1.5;}
+  .wr-val.status-normal{color:var(--mint-text);}
+  .wr-val.status-borderline{color:var(--warn-text);}
+  .wr-val.status-high{color:var(--danger-text);}
+
   /* cross-device sync */
-  .io-btn.synced{color:var(--mint);border-color:var(--mint);}
+  .io-btn.synced{color:var(--mint-text);border-color:var(--mint-text);}
   .io-btn.sync-offline{color:var(--warn-text);border-color:var(--warn-border);}
   .sync-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
   [data-theme="light"] .sync-overlay{background:rgba(30,26,21,0.4);}
@@ -158,23 +176,25 @@
   .sync-steps code{background:var(--surface-2);padding:1px 5px;border-radius:5px;font-size:11.5px;}
   .sync-modal textarea{width:100%;min-height:110px;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;
     padding:10px 12px;color:var(--text);font-size:12.5px;font-family:ui-monospace,monospace;outline:none;resize:vertical;}
-  .sync-modal textarea:focus{border-color:var(--mint);}
+  .sync-modal textarea:focus{border-color:var(--mint-text);}
   .sync-status-row{display:flex;align-items:center;gap:8px;margin-bottom:14px;font-size:13px;}
   .sync-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
-  .sync-status-dot.on{background:var(--mint);}
+  .sync-status-dot.on{background:var(--mint-text);}
   .sync-status-dot.off{background:var(--warn-text);}
   .add-btn{width:42px;height:42px;border-radius:50%;background:var(--mint);color:var(--on-mint);border:none;cursor:pointer;
     font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .io-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--muted);
     cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .io-btn:hover{color:var(--mint);border-color:var(--mint);}
+  .io-btn:hover{color:var(--mint-text);border-color:var(--mint-text);}
 
   .form{margin-top:20px;border-radius:16px;border:1px solid var(--line-strong);background:var(--surface-2);padding:16px;display:none;flex-direction:column;gap:14px;}
   .form.open{display:flex;}
   .field label{display:block;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
-  .field input[type=text],.field input[type=time],.field input[type=number],.field input[type=date]{width:100%;background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;
+  .field{min-width:0;}
+  .field input[type=text],.field input[type=time],.field input[type=number],.field input[type=date]{width:100%;max-width:100%;
+    min-width:0;-webkit-min-logical-width:0;box-sizing:border-box;background:var(--bg);border:1px solid var(--line-strong);border-radius:10px;
     padding:10px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;}
-  .field input:focus{border-color:var(--mint);}
+  .field input:focus{border-color:var(--mint-text);}
   .field-row{display:flex;gap:10px;}
   .field-row .field{flex:1;min-width:0;}
   .seg{display:flex;flex-wrap:wrap;gap:6px;}
@@ -192,14 +212,14 @@
   .tm-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
   .tm-row{display:flex;align-items:center;gap:12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:12px 14px;}
   .tm-row .icon{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);
-    color:var(--mint);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+    color:var(--mint-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
   .tm-row .info{min-width:0;flex:1;}
   .tm-row .info p{margin:0;font-size:15px;font-weight:500;}
   .tm-row .info span.sub{font-size:12px;color:var(--muted);}
   .tm-row .info .badges{margin-top:4px;display:flex;flex-wrap:wrap;gap:6px;}
   .icon-btn{width:32px;height:32px;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:15px;border-radius:8px;flex-shrink:0;}
-  .icon-btn:hover{color:var(--mint);background:var(--surface-2);}
-  .icon-btn.danger:hover{color:var(--coral);}
+  .icon-btn:hover{color:var(--mint-text);background:var(--surface-2);}
+  .icon-btn.danger:hover{color:var(--danger-text);}
 
   /* history / calendar */
   .hist-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;}
@@ -212,25 +232,33 @@
   .cal-grid{margin-top:14px;display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
   .cal-dow{font-size:10.5px;color:var(--muted-dim);text-align:center;padding-bottom:2px;}
   .cal-day{aspect-ratio:1;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12.5px;
-    cursor:pointer;border:1px solid transparent;color:var(--text);background:var(--surface-2);}
+    cursor:pointer;border:1px solid transparent;color:var(--text);background:var(--surface-2);position:relative;}
   .cal-day.empty{visibility:hidden;cursor:default;}
   .cal-day.future{color:var(--muted-dim);cursor:default;background:transparent;}
   .cal-day.nodata{background:var(--surface-2);color:var(--muted-dim);}
   .cal-day.full{background:var(--mint);color:var(--on-mint);font-weight:700;}
   .cal-day.partial{background:#3A544D;color:var(--text);}
   .cal-day.none{background:var(--danger-bg);color:var(--danger-text);}
-  .cal-day.selected{border-color:var(--mint);}
-  .cal-day.today{box-shadow:0 0 0 1.5px var(--mint) inset;}
+  .cal-day.selected{border-color:var(--mint-text);}
+  .cal-day.today{box-shadow:0 0 0 1.5px var(--mint-text) inset;}
+  .cal-day-dots{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);display:flex;gap:2px;}
+  .cal-day-dots span{width:4px;height:4px;border-radius:50%;display:block;}
+  .cal-day-dots span.w{background:var(--mint-text);}
+  .cal-day-dots span.s{background:var(--amber-text);}
+  .cal-day-dots span.m{background:var(--lavender-text);}
+  .cal-day.full .cal-day-dots span, .cal-day.none .cal-day-dots span{box-shadow:0 0 0 1px var(--surface);}
   .cal-legend{display:flex;gap:14px;margin-top:14px;flex-wrap:wrap;}
   .cal-legend span{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--muted);}
   .cal-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
   .day-detail{margin-top:20px;border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:14px 16px;}
   .day-detail h3{margin:0 0 10px;font-size:14px;font-weight:600;}
+  .day-detail-section-title{margin:14px 0 4px;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.03em;}
   .day-detail-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13.5px;border-top:1px solid var(--line);}
   .day-detail-row:first-of-type{border-top:none;}
   .day-detail-row .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-  .day-detail-row .dot.yes{background:var(--mint);}
-  .day-detail-row .dot.no{background:var(--coral);}
+  .day-detail-row .dot.yes{background:var(--mint-text);}
+  .day-detail-row .dot.no{background:var(--danger-text);}
+  .day-detail-row .dot.warn{background:var(--warn-text);}
   .day-detail-empty{font-size:13px;color:var(--muted-dim);}
 
   /* toast */
@@ -240,12 +268,12 @@
   .toast.show{opacity:1;}
 
   /* nav */
-  .nav{position:fixed;left:0;right:0;bottom:22px;display:flex;justify-content:center;padding:0 14px;}
-  .nav-inner{display:flex;gap:3px;padding:6px;border-radius:18px;border:1px solid var(--line-strong);
-    background:rgba(16,28,25,0.92);backdrop-filter:blur(6px);box-shadow:0 10px 30px rgba(0,0,0,.4);}
+  .nav{position:fixed;left:0;right:0;bottom:22px;display:flex;justify-content:center;padding:0 10px;}
+  .nav-inner{display:flex;gap:2px;padding:5px;border-radius:18px;border:1px solid var(--line-strong);
+    background:rgba(16,28,25,0.92);backdrop-filter:blur(6px);box-shadow:0 10px 30px rgba(0,0,0,.4);max-width:100%;overflow-x:auto;}
   [data-theme="light"] .nav-inner{background:rgba(255,255,255,0.9);}
-  .nav-inner button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:11.5px;font-weight:600;
-    padding:10px 11px;border-radius:12px;cursor:pointer;white-space:nowrap;}
+  .nav-inner button{border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:10.5px;font-weight:600;
+    padding:9px 8px;border-radius:12px;cursor:pointer;white-space:nowrap;flex-shrink:0;}
   .nav-inner button.active{background:var(--mint);color:var(--on-mint);}
 
   .view{display:none;}
@@ -412,6 +440,9 @@
       <span><i style="background:#3A544D;"></i>Some taken</span>
       <span><i style="background:var(--danger-bg);border:1px solid var(--danger-border);"></i>None taken</span>
       <span><i style="background:var(--surface-2);border:1px solid var(--line-strong);"></i>No tablets yet</span>
+      <span><i style="background:var(--mint-text);border-radius:50%;"></i>Weight logged</span>
+      <span><i style="background:var(--amber-text);border-radius:50%;"></i>Sugar logged</span>
+      <span><i style="background:var(--lavender-text);border-radius:50%;"></i>Milestone done</span>
     </div>
     <div id="dayDetail" class="day-detail hidden">
       <h3 id="dayDetailTitle"></h3>
@@ -442,25 +473,74 @@
         <p id="mileSummarySmall"></p>
       </div>
       <div class="mile-list" id="mileList"></div>
-
-      <div class="weight-section">
-        <h3 class="weight-title display">Weight tracking</h3>
-        <div id="weightStats" class="weight-stats hidden"></div>
-        <div id="weightChartWrap" class="weight-chart-wrap hidden"><svg id="weightChart" viewBox="0 0 320 140"></svg></div>
-        <div id="weightEmpty" class="empty-state hidden">Log your weight at each visit to see your trend here.</div>
-
-        <div class="weight-form">
-          <div class="field-row">
-            <div class="field"><label>Date</label><input type="date" id="wDate"></div>
-            <div class="field"><label>Weight (kg)</label><input type="number" step="0.1" min="0" id="wValue" placeholder="e.g. 62.5"></div>
-          </div>
-          <div class="field"><label>Note (optional)</label><input type="text" id="wNote" placeholder="e.g. Dr visit — BP normal"></div>
-          <div class="form-actions"><button class="btn primary" id="wAddBtn">Add entry</button></div>
-        </div>
-
-        <div class="weight-list" id="weightList"></div>
-      </div>
     </div>
+  </div>
+
+  <!-- ===== WEIGHT TRACKING VIEW ===== -->
+  <div id="weightView" class="view">
+    <div class="hist-header">
+      <div>
+        <h1 class="display">Weight</h1>
+        <p>Log your weight at each visit and watch the trend.</p>
+      </div>
+      <button class="theme-toggle-btn io-btn" title="Toggle theme">🌙</button>
+    </div>
+
+    <div id="weightStats" class="weight-stats hidden"></div>
+    <div id="weightChartWrap" class="weight-chart-wrap hidden"><svg id="weightChart" viewBox="0 0 320 140"></svg></div>
+    <div id="weightEmpty" class="empty-state hidden">Log your weight at each visit to see your trend here.</div>
+
+    <div class="weight-form">
+      <div class="field"><label>Date</label><input type="date" id="wDate"></div>
+      <div class="field"><label>Weight (kg)</label><input type="number" step="0.1" min="0" id="wValue" placeholder="e.g. 62.5"></div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="wNote" placeholder="e.g. Dr visit — BP normal"></div>
+      <div class="form-actions"><button class="btn primary" id="wAddBtn">Add entry</button></div>
+    </div>
+
+    <div class="weight-list" id="weightList"></div>
+  </div>
+
+  <!-- ===== SUGAR TRACKING VIEW ===== -->
+  <div id="sugarView" class="view">
+    <div class="hist-header">
+      <div>
+        <h1 class="display">Sugar</h1>
+        <p>Log blood sugar readings and watch the trend.</p>
+      </div>
+      <button class="theme-toggle-btn io-btn" title="Toggle theme">🌙</button>
+    </div>
+
+    <div id="sugarStats" class="weight-stats hidden"></div>
+    <div id="sugarChartWrap" class="weight-chart-wrap hidden"><svg id="sugarChart" viewBox="0 0 320 140"></svg></div>
+    <div id="sugarEmpty" class="empty-state hidden">Log a reading to see your trend here.</div>
+
+    <div class="weight-form">
+      <div class="field"><label>Date</label><input type="date" id="sDate"></div>
+      <div class="field"><label>Time of sample</label><input type="time" id="sTime"></div>
+      <div class="field">
+        <label>Reading type</label>
+        <div class="seg" id="sType">
+          <button type="button" data-val="fasting" class="active">Fasting</button>
+          <button type="button" data-val="post1hr">1h after meal</button>
+          <button type="button" data-val="post2hr">2h after meal</button>
+          <button type="button" data-val="random">Random</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Measured with</label>
+        <div class="seg" id="sMethod">
+          <button type="button" data-val="glucometer" class="active">Glucometer</button>
+          <button type="button" data-val="plasma">Plasma (lab)</button>
+        </div>
+      </div>
+      <div class="field"><label>Reading (mg/dL)</label><input type="number" step="1" min="0" id="sValue" placeholder="e.g. 92"></div>
+      <div class="field"><label>Note (optional)</label><input type="text" id="sNote" placeholder="e.g. After breakfast"></div>
+      <div class="form-actions"><button class="btn primary" id="sAddBtn">Add reading</button></div>
+    </div>
+
+    <div class="weight-list" id="sugarList"></div>
+
+    <p class="sugar-note"><b>Pregnancy (gestational diabetes) reference ranges</b> — green (normal): Fasting ≤95, 1hr after meal ≤140, 2hr after meal ≤120, Random ≤140 mg/dL · amber (borderline) sits between normal and high · red (high): Fasting ≥126, 1hr/Random ≥181, 2hr ≥161 mg/dL. These are stricter than general non-pregnant adult targets, and are not a diagnosis. Always follow your own doctor's specific targets.</p>
   </div>
 
 </div>
@@ -470,6 +550,8 @@
 <div class="nav">
   <div class="nav-inner">
     <button id="navToday" class="active">Today</button>
+    <button id="navWeight">Weight</button>
+    <button id="navSugar">Sugar</button>
     <button id="navMaster">Master</button>
     <button id="navHistory">History</button>
     <button id="navMilestones">Milestones</button>
@@ -563,7 +645,9 @@
   var syncEnabled = false;
   var pregnancyCache = null;
   var overridesCache = {};
+  var milestoneDatesCache = {};
   var weightsCache = [];
+  var sugarCache = [];
   var logsCache_ = {};
   var alertedCache_ = {};
 
@@ -573,6 +657,9 @@
   }
   function loadMilestoneOverridesLocal(){
     try{ return JSON.parse(localStorage.getItem('tm_milestone_overrides')||'{}'); }catch(e){ return {}; }
+  }
+  function loadMilestoneDatesLocal(){
+    try{ return JSON.parse(localStorage.getItem('tm_milestone_dates')||'{}'); }catch(e){ return {}; }
   }
   function loadWeightsLocal(){
     try{ return JSON.parse(localStorage.getItem('tm_weights')||'[]'); }catch(e){ return []; }
@@ -607,8 +694,8 @@
     if(syncEnabled && fb) fb.ref('pregnancy').set(p);
   }
   function clearPregnancy(){
-    try{ localStorage.removeItem('tm_pregnancy'); localStorage.removeItem('tm_milestone_overrides'); }catch(e){}
-    if(syncEnabled && fb){ fb.ref('pregnancy').remove(); fb.ref('milestoneOverrides').remove(); }
+    try{ localStorage.removeItem('tm_pregnancy'); localStorage.removeItem('tm_milestone_overrides'); localStorage.removeItem('tm_milestone_dates'); }catch(e){}
+    if(syncEnabled && fb){ fb.ref('pregnancy').remove(); fb.ref('milestoneOverrides').remove(); fb.ref('milestoneDates').remove(); }
   }
   function loadMilestoneOverrides(){
     return syncEnabled ? (overridesCache || {}) : loadMilestoneOverridesLocal();
@@ -616,6 +703,13 @@
   function saveMilestoneOverrides(o){
     try{ localStorage.setItem('tm_milestone_overrides', JSON.stringify(o)); }catch(e){}
     if(syncEnabled && fb) fb.ref('milestoneOverrides').set(o);
+  }
+  function loadMilestoneDates(){
+    return syncEnabled ? (milestoneDatesCache || {}) : loadMilestoneDatesLocal();
+  }
+  function saveMilestoneDates(o){
+    try{ localStorage.setItem('tm_milestone_dates', JSON.stringify(o)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('milestoneDates').set(o);
   }
   function computePregnancy(mode, inputDate){
     var lmp, edd;
@@ -629,6 +723,16 @@
   function saveWeights(list){
     try{ localStorage.setItem('tm_weights', JSON.stringify(list)); }catch(e){}
     if(syncEnabled && fb) fb.ref('weights').set(list);
+  }
+  function loadSugarLocal(){
+    try{ return JSON.parse(localStorage.getItem('tm_sugar')||'[]'); }catch(e){ return []; }
+  }
+  function loadSugar(){
+    return syncEnabled ? (sugarCache || []) : loadSugarLocal();
+  }
+  function saveSugar(list){
+    try{ localStorage.setItem('tm_sugar', JSON.stringify(list)); }catch(e){}
+    if(syncEnabled && fb) fb.ref('sugar').set(list);
   }
   function loadTablets(){
     try{ return JSON.parse(localStorage.getItem('tm_tablets')||'[]'); }catch(e){ return []; }
@@ -910,8 +1014,11 @@
       var expLabel = expDays < 0 ? 'Expired' : (expDays===0 ? 'Expires today' : 'Expires in '+expDays+'d');
       badges += '<span class="tag expiry">'+expLabel+'</span>';
     }
+    if(overdue){
+      badges += '<span class="overdue-badge">Overdue</span>';
+      badges += '<button class="snooze-btn" data-snooze-id="'+t.id+'">😴 Snooze</button>';
+    }
 
-    var snoozeBtnHtml = (overdue) ? '<button class="snooze-btn" data-snooze-id="'+t.id+'">😴 Snooze</button>' : '';
     var snoozedNoteHtml = (snoozed && !taken) ?
       '<div class="snoozed-note">Snoozed until '+new Date(entry.snoozeUntil).toLocaleTimeString([], {hour:'numeric', minute:'2-digit'})+'</div>' : '';
 
@@ -926,8 +1033,6 @@
               badges +
             '</div>' +
           '</div>' +
-          (overdue ? '<span class="overdue-badge">Overdue</span>' : '') +
-          snoozeBtnHtml +
         '</div>' +
         snoozedNoteHtml +
       '</div>'
@@ -1006,17 +1111,19 @@
     renderToday();
   }
 
-  /* ---------------- export / import (full backup: tablets + pregnancy + milestones + weights) ---------------- */
+  /* ---------------- export / import (full backup: tablets + pregnancy + milestones + weights + sugar) ---------------- */
   function exportTablets(){
-    var hasAnything = tablets.length > 0 || !!loadPregnancy() || loadWeights().length > 0;
+    var hasAnything = tablets.length > 0 || !!loadPregnancy() || loadWeights().length > 0 || loadSugar().length > 0;
     if(!hasAnything){ showToast('Nothing to export yet'); return; }
     var bundle = {
-      version: 2,
+      version: 4,
       exportedAt: Date.now(),
       tablets: tablets,
       pregnancy: loadPregnancy(),
       milestoneOverrides: loadMilestoneOverrides(),
-      weights: loadWeights()
+      milestoneDates: loadMilestoneDates(),
+      weights: loadWeights(),
+      sugar: loadSugar()
     };
     var blob = new Blob([JSON.stringify(bundle, null, 2)], {type:'application/json'});
     var url = URL.createObjectURL(blob);
@@ -1039,14 +1146,16 @@
       try{ data = JSON.parse(reader.result); }
       catch(e){ showToast('That file is not valid JSON'); return; }
 
-      var importedTablets, importedPregnancy = null, importedOverrides = null, importedWeights = null;
+      var importedTablets, importedPregnancy = null, importedOverrides = null, importedMilestoneDates = null, importedWeights = null, importedSugar = null;
       if(Array.isArray(data)){
         importedTablets = data;
       } else if(data && Array.isArray(data.tablets)){
         importedTablets = data.tablets;
         importedPregnancy = data.pregnancy || null;
         importedOverrides = data.milestoneOverrides || null;
+        importedMilestoneDates = data.milestoneDates || null;
         importedWeights = data.weights || null;
+        importedSugar = data.sugar || null;
       } else {
         showToast('That file doesn\'t look like a Tablet Master backup');
         return;
@@ -1089,6 +1198,13 @@
         });
         saveMilestoneOverrides(curOverrides);
       }
+      if(importedMilestoneDates){
+        var curMilestoneDates = loadMilestoneDates();
+        Object.keys(importedMilestoneDates).forEach(function(k){
+          if(!(k in curMilestoneDates)) curMilestoneDates[k] = importedMilestoneDates[k];
+        });
+        saveMilestoneDates(curMilestoneDates);
+      }
       if(importedWeights && importedWeights.length){
         var curWeights = loadWeights();
         var existingKeys = curWeights.map(function(w){ return w.date+'|'+w.weight; });
@@ -1103,6 +1219,23 @@
           }
         });
         if(addedWeights){ saveWeights(curWeights); extras.push(addedWeights+' weight entr'+(addedWeights===1?'y':'ies')); }
+      }
+      if(importedSugar && importedSugar.length){
+        var curSugar = loadSugar();
+        var existingSugarKeys = curSugar.map(function(s){ return s.date+'|'+(s.time||'')+'|'+s.type+'|'+s.value+'|'+(s.method||'glucometer'); });
+        var addedSugar = 0;
+        importedSugar.forEach(function(s){
+          if(!s || !s.date || s.value == null) return;
+          var type = SUGAR_TYPE_LABELS[s.type] ? s.type : 'random';
+          var method = SUGAR_METHOD_LABELS[s.method] ? s.method : 'glucometer';
+          var key = s.date+'|'+(s.time||'')+'|'+type+'|'+s.value+'|'+method;
+          if(existingSugarKeys.indexOf(key) === -1){
+            curSugar.push({id: uid(), date: s.date, time: s.time || null, type: type, method: method, value: Number(s.value), note: s.note || '', createdAt: s.createdAt || Date.now()});
+            existingSugarKeys.push(key);
+            addedSugar++;
+          }
+        });
+        if(addedSugar){ saveSugar(curSugar); extras.push(addedSugar+' sugar reading'+(addedSugar===1?'':'s')); }
       }
 
       renderMaster();
@@ -1249,6 +1382,14 @@
     var daysInMonth = new Date(y,m+1,0).getDate();
     var todayStr = todayKey();
 
+    var weightDates = {};
+    loadWeights().forEach(function(w){ weightDates[w.date] = true; });
+    var sugarDates = {};
+    loadSugar().forEach(function(s){ sugarDates[s.date] = true; });
+    var milestoneDatesAll = loadMilestoneDates();
+    var milestoneDayDates = {};
+    Object.keys(milestoneDatesAll).forEach(function(k){ milestoneDayDates[milestoneDatesAll[k]] = true; });
+
     for(var i=0;i<firstDow;i++){
       var pad = document.createElement('div');
       pad.className = 'cal-day empty';
@@ -1260,7 +1401,12 @@
       var dateStr = todayKey(dateObj);
       var cell = document.createElement('div');
       cell.className = 'cal-day';
-      cell.textContent = d;
+
+      var dotsHtml = '';
+      if(weightDates[dateStr]) dotsHtml += '<span class="w"></span>';
+      if(sugarDates[dateStr]) dotsHtml += '<span class="s"></span>';
+      if(milestoneDayDates[dateStr]) dotsHtml += '<span class="m"></span>';
+      cell.innerHTML = d + (dotsHtml ? '<span class="cal-day-dots">'+dotsHtml+'</span>' : '');
 
       if(dateStr > todayStr){
         cell.classList.add('future');
@@ -1299,11 +1445,11 @@
     var eod = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(),23,59,59).getTime();
     var applicable = tablets.filter(function(t){ return !t.createdAt || t.createdAt <= eod; });
     var dayLog = loadLog(dateStr);
-    var body = document.getElementById('dayDetailBody');
+    var html = '';
     if(applicable.length === 0){
-      body.innerHTML = '<div class="day-detail-empty">No tablets were set up yet on this day.</div>';
+      html += '<div class="day-detail-empty">No tablets were set up yet on this day.</div>';
     } else {
-      body.innerHTML = applicable.map(function(t){
+      html += applicable.map(function(t){
         var e = dayLog[t.id];
         var taken = e === true || (e && typeof e === 'object' && e.taken);
         return '<div class="day-detail-row"><span class="dot '+(taken?'yes':'no')+'"></span>' +
@@ -1311,6 +1457,41 @@
           '<span style="margin-left:auto;color:var(--muted);font-size:12px;">'+(taken?'Taken':'Missed')+'</span></div>';
       }).join('');
     }
+
+    var dayWeights = loadWeights().filter(function(w){ return w.date === dateStr; });
+    if(dayWeights.length){
+      html += '<div class="day-detail-section-title">Weight</div>';
+      html += dayWeights.map(function(w){
+        return '<div class="day-detail-row"><span class="dot yes"></span>' +
+          '<span>'+w.weight+' kg</span>' +
+          '<span style="margin-left:auto;color:var(--muted);font-size:12px;">'+escapeHtml(w.note||'')+'</span></div>';
+      }).join('');
+    }
+
+    var daySugar = loadSugar().filter(function(s){ return s.date === dateStr; }).sort(function(a,b){
+      return (a.time||'').localeCompare(b.time||'');
+    });
+    if(daySugar.length){
+      html += '<div class="day-detail-section-title">Sugar</div>';
+      html += daySugar.map(function(s){
+        var status = sugarStatus(s);
+        var dotClass = status === 'normal' ? 'yes' : (status === 'high' ? 'no' : 'warn');
+        return '<div class="day-detail-row"><span class="dot '+dotClass+'"></span>' +
+          '<span>'+s.value+' mg/dL — '+SUGAR_TYPE_LABELS[s.type]+(s.time?' · '+formatTime(s.time):'')+'</span>' +
+          '<span style="margin-left:auto;color:var(--muted);font-size:12px;">'+sugarStatusLabel(status)+'</span></div>';
+      }).join('');
+    }
+
+    var milestoneDatesAll2 = loadMilestoneDates();
+    var dayMilestones = MILESTONES.filter(function(mm){ return milestoneDatesAll2[mm.key] === dateStr; });
+    if(dayMilestones.length){
+      html += '<div class="day-detail-section-title">Milestones</div>';
+      html += dayMilestones.map(function(mm){
+        return '<div class="day-detail-row"><span class="dot yes"></span><span>'+mm.label+'</span></div>';
+      }).join('');
+    }
+
+    document.getElementById('dayDetailBody').innerHTML = html;
     panel.classList.remove('hidden');
   }
 
@@ -1401,9 +1582,22 @@
     if(!m) return;
     var overrides = loadMilestoneOverrides();
     var current = isMilestoneDone(m, preg, overrides);
-    overrides[key] = !current;
+    var next = !current;
+    overrides[key] = next;
     saveMilestoneOverrides(overrides);
+    if(next){
+      var dates = loadMilestoneDates();
+      if(!dates[key]){
+        dates[key] = todayKey();
+        saveMilestoneDates(dates);
+      }
+    }
     renderMilestones();
+  }
+  function setMilestoneDate(key, dateStr){
+    var dates = loadMilestoneDates();
+    if(dateStr){ dates[key] = dateStr; } else { delete dates[key]; }
+    saveMilestoneDates(dates);
   }
 
   function renderMilestones(){
@@ -1419,6 +1613,7 @@
     content.classList.remove('hidden');
 
     var overrides = loadMilestoneOverrides();
+    var completedDates = loadMilestoneDates();
     var todayStr = todayKey();
     var daysPregnant = diffDaysKey(todayStr, preg.lmp);
     var doneCount = MILESTONES.filter(function(m){ return isMilestoneDone(m, preg, overrides); }).length;
@@ -1444,6 +1639,12 @@
       else if(todayStr >= startDate && todayStr <= endDate){ statusClass='duenow'; statusText='Due now'; }
       else { statusClass='upcoming'; statusText='Upcoming'; }
       var dateLabel = (m.dayStart === m.dayEnd) ? formatDateNice(startDate) : (formatDateNice(startDate)+' – '+formatDateNice(endDate));
+      var completedRowHtml = done ? (
+        '<div class="mile-completed-row">' +
+          '<label>Actually done on</label>' +
+          '<input type="date" class="mile-date-input" data-mkey="'+m.key+'" value="'+(completedDates[m.key]||'')+'">' +
+        '</div>'
+      ) : '';
       return (
         '<div class="mile-card '+statusClass+'">' +
           '<button class="check'+(done?' on':'')+'" data-mkey="'+m.key+'">'+(done?'✓':'')+'</button>' +
@@ -1454,6 +1655,7 @@
               '<span class="mile-status '+statusClass+'">'+statusText+'</span>' +
             '</div>' +
             '<p class="mile-note">'+m.note+'</p>' +
+            completedRowHtml +
           '</div>' +
         '</div>'
       );
@@ -1461,22 +1663,24 @@
     list.querySelectorAll('.check').forEach(function(btn){
       btn.addEventListener('click', function(){ toggleMilestone(btn.dataset.mkey); });
     });
-    renderWeightSection();
+    list.querySelectorAll('.mile-date-input').forEach(function(input){
+      input.addEventListener('click', function(e){ e.stopPropagation(); });
+      input.addEventListener('change', function(){ setMilestoneDate(input.dataset.mkey, input.value); });
+    });
   }
   document.getElementById('mileGoSetup').addEventListener('click', function(){
     showView('master');
     document.getElementById('pregCard').scrollIntoView({behavior:'smooth', block:'start'});
   });
 
-  /* ---------------- weight tracking ---------------- */
+  /* ---------------- weight & sugar tracking (shared trend-chart helper) ---------------- */
   function formatDateShort(dateStr){
     var d = new Date(dateStr+'T00:00:00');
     return d.toLocaleDateString(undefined,{day:'numeric',month:'short'});
   }
-  function drawWeightChart(entries){
-    var svg = document.getElementById('weightChart');
+  function drawTrendChart(svg, entries, getValue, formatLabel, getColor){
     var W=320, H=140, padL=32, padR=10, padT=14, padB=22;
-    var values = entries.map(function(e){ return e.weight; });
+    var values = entries.map(getValue);
     var minV = Math.min.apply(null, values), maxV = Math.max.apply(null, values);
     if(minV === maxV){ minV -= 1; maxV += 1; }
     var rangePad = (maxV-minV)*0.15;
@@ -1485,19 +1689,20 @@
     function xFor(i){ return padL + (W-padL-padR) * (entries.length===1 ? 0 : (i/(entries.length-1))); }
     function yFor(v){ return H-padB - (H-padT-padB) * ((v-minV)/(maxV-minV)); }
 
-    var mintColor = getComputedStyle(document.documentElement).getPropertyValue('--mint').trim() || '#5EEAD4';
+    var mintColor = getComputedStyle(document.documentElement).getPropertyValue('--mint-text').trim() || '#5EEAD4';
     var lineColor = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#86A69C';
 
-    var pts = entries.map(function(e,i){ return xFor(i)+','+yFor(e.weight); }).join(' ');
+    var pts = entries.map(function(e,i){ return xFor(i)+','+yFor(getValue(e)); }).join(' ');
     var svgHtml = '';
     [minV, (minV+maxV)/2, maxV].forEach(function(v){
       var y = yFor(v);
       svgHtml += '<line x1="'+padL+'" y1="'+y+'" x2="'+(W-padR)+'" y2="'+y+'" stroke="'+lineColor+'" stroke-opacity="0.15" stroke-width="1"/>';
-      svgHtml += '<text x="2" y="'+(y+3)+'" font-size="9" fill="'+lineColor+'">'+v.toFixed(1)+'</text>';
+      svgHtml += '<text x="2" y="'+(y+3)+'" font-size="9" fill="'+lineColor+'">'+formatLabel(v)+'</text>';
     });
-    svgHtml += '<polyline points="'+pts+'" fill="none" stroke="'+mintColor+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+    svgHtml += '<polyline points="'+pts+'" fill="none" stroke="'+lineColor+'" stroke-opacity="0.5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
     entries.forEach(function(e,i){
-      svgHtml += '<circle cx="'+xFor(i)+'" cy="'+yFor(e.weight)+'" r="3.5" fill="'+mintColor+'"/>';
+      var dotColor = getColor ? getColor(e) : mintColor;
+      svgHtml += '<circle cx="'+xFor(i)+'" cy="'+yFor(getValue(e))+'" r="4" fill="'+dotColor+'"/>';
     });
     svgHtml += '<text x="'+xFor(0)+'" y="'+(H-6)+'" font-size="9" fill="'+lineColor+'" text-anchor="start">'+formatDateShort(entries[0].date)+'</text>';
     svgHtml += '<text x="'+xFor(entries.length-1)+'" y="'+(H-6)+'" font-size="9" fill="'+lineColor+'" text-anchor="end">'+formatDateShort(entries[entries.length-1].date)+'</text>';
@@ -1527,7 +1732,7 @@
 
     if(entries.length >= 2){
       chartWrap.classList.remove('hidden');
-      drawWeightChart(entries);
+      drawTrendChart(document.getElementById('weightChart'), entries, function(e){ return e.weight; }, function(v){ return v.toFixed(1); });
     } else {
       chartWrap.classList.add('hidden');
     }
@@ -1563,6 +1768,130 @@
     showToast('Weight logged');
   });
 
+  /* ---------------- sugar tracking ---------------- */
+  var SUGAR_THRESHOLDS = {
+    fasting:  {normal:95,  high:126},
+    post1hr:  {normal:140, high:181},
+    post2hr:  {normal:120, high:161},
+    postmeal: {normal:140, high:181}, /* legacy alias for entries logged before 1h/2h split */
+    random:   {normal:140, high:181}
+  };
+  var SUGAR_TYPE_LABELS = {fasting:'Fasting', post1hr:'1hr after meal', post2hr:'2hr after meal', postmeal:'1hr after meal', random:'Random'};
+  var SUGAR_METHOD_LABELS = {glucometer:'Glucometer', plasma:'Plasma (lab)'};
+  var sugarTypeState = 'fasting';
+  var sugarMethodState = 'glucometer';
+  function sugarStatus(entry){
+    var t = SUGAR_THRESHOLDS[entry.type] || SUGAR_THRESHOLDS.random;
+    if(entry.value <= t.normal) return 'normal';
+    if(entry.value < t.high) return 'borderline';
+    return 'high';
+  }
+  function sugarStatusLabel(status){
+    return status === 'high' ? 'High' : (status === 'borderline' ? 'Borderline' : 'Normal');
+  }
+  function sugarStatusColorVar(status){
+    return status === 'high' ? '--danger-text' : (status === 'borderline' ? '--warn-text' : '--mint-text');
+  }
+  document.getElementById('sType').querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('sType').querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      sugarTypeState = btn.dataset.val;
+    });
+  });
+  document.getElementById('sMethod').querySelectorAll('button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.getElementById('sMethod').querySelectorAll('button').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      sugarMethodState = btn.dataset.val;
+    });
+  });
+  function renderSugarSection(){
+    var entries = loadSugar().slice().sort(function(a,b){
+      var ak = a.date+'T'+(a.time||'00:00');
+      var bk = b.date+'T'+(b.time||'00:00');
+      if(ak !== bk) return ak.localeCompare(bk);
+      return (a.createdAt||0) - (b.createdAt||0);
+    });
+    var statsEl = document.getElementById('sugarStats');
+    var chartWrap = document.getElementById('sugarChartWrap');
+    var emptyEl = document.getElementById('sugarEmpty');
+    var listEl = document.getElementById('sugarList');
+
+    if(entries.length === 0){
+      statsEl.classList.add('hidden');
+      chartWrap.classList.add('hidden');
+      emptyEl.classList.remove('hidden');
+      listEl.innerHTML = '';
+      return;
+    }
+    emptyEl.classList.add('hidden');
+    statsEl.classList.remove('hidden');
+    var last = entries[entries.length-1];
+    var avg = entries.reduce(function(s,e){ return s+e.value; }, 0) / entries.length;
+    var highCount = entries.filter(function(e){ return sugarStatus(e) === 'high'; }).length;
+    var borderlineCount = entries.filter(function(e){ return sugarStatus(e) === 'borderline'; }).length;
+    var flagParts = [];
+    if(highCount) flagParts.push(highCount+' high');
+    if(borderlineCount) flagParts.push(borderlineCount+' borderline');
+    statsEl.innerHTML = 'Last: <b>'+last.value+' mg/dL</b> ('+SUGAR_TYPE_LABELS[last.type]+') · Average <b>'+avg.toFixed(0)+' mg/dL</b> over '+entries.length+' reading'+(entries.length===1?'':'s')+(flagParts.length ? ' · '+flagParts.join(', ') : '');
+
+    if(entries.length >= 2){
+      chartWrap.classList.remove('hidden');
+      drawTrendChart(document.getElementById('sugarChart'), entries, function(e){ return e.value; }, function(v){ return v.toFixed(0); }, function(e){
+        var color = getComputedStyle(document.documentElement).getPropertyValue(sugarStatusColorVar(sugarStatus(e))).trim();
+        return color;
+      });
+    } else {
+      chartWrap.classList.add('hidden');
+    }
+
+    var listSorted = entries.slice().reverse();
+    listEl.innerHTML = listSorted.map(function(e){
+      var status = sugarStatus(e);
+      var method = SUGAR_METHOD_LABELS[e.method] || SUGAR_METHOD_LABELS.glucometer;
+      var dateLabel = formatDateNice(e.date) + (e.time ? ' · '+formatTime(e.time) : '');
+      return '<div class="sugar-row">' +
+        '<span class="wr-date">'+dateLabel+'</span>' +
+        '<span class="wr-val status-'+status+'">'+e.value+' mg/dL</span>' +
+        '<span class="tag any">'+SUGAR_TYPE_LABELS[e.type]+'</span>' +
+        '<span class="tag any">'+method+'</span>' +
+        '<span class="tag '+status+'">'+sugarStatusLabel(status)+'</span>' +
+        (e.note ? '<span class="wr-note">'+escapeHtml(e.note)+'</span>' : '') +
+        '<button class="icon-btn danger" data-sid="'+e.id+'" title="Delete">✕</button>' +
+      '</div>';
+    }).join('');
+    listEl.querySelectorAll('[data-sid]').forEach(function(btn){
+      btn.addEventListener('click', function(){ deleteSugar(btn.dataset.sid); });
+    });
+  }
+  function deleteSugar(id){
+    var list = loadSugar().filter(function(s){ return s.id !== id; });
+    saveSugar(list);
+    renderSugarSection();
+  }
+  function currentTimeHHMM(){
+    var n = new Date();
+    return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');
+  }
+  document.getElementById('sAddBtn').addEventListener('click', function(){
+    var date = document.getElementById('sDate').value || todayKey();
+    var time = document.getElementById('sTime').value || null;
+    var val = document.getElementById('sValue').value;
+    if(!val || isNaN(Number(val))){ showToast('Enter a reading value'); return; }
+    var list = loadSugar();
+    list.push({
+      id: uid(), date: date, time: time, type: sugarTypeState, method: sugarMethodState, value: Number(val),
+      note: document.getElementById('sNote').value.trim(), createdAt: Date.now()
+    });
+    saveSugar(list);
+    document.getElementById('sValue').value = '';
+    document.getElementById('sNote').value = '';
+    document.getElementById('sTime').value = currentTimeHHMM();
+    renderSugarSection();
+    showToast('Reading logged');
+  });
+
   /* ---------------- nav ---------------- */
   function showView(name){
     currentView = name;
@@ -1570,10 +1899,14 @@
     document.getElementById('masterView').classList.toggle('active', name==='master');
     document.getElementById('historyView').classList.toggle('active', name==='history');
     document.getElementById('milestonesView').classList.toggle('active', name==='milestones');
+    document.getElementById('weightView').classList.toggle('active', name==='weight');
+    document.getElementById('sugarView').classList.toggle('active', name==='sugar');
     document.getElementById('navToday').classList.toggle('active', name==='today');
     document.getElementById('navMaster').classList.toggle('active', name==='master');
     document.getElementById('navHistory').classList.toggle('active', name==='history');
     document.getElementById('navMilestones').classList.toggle('active', name==='milestones');
+    document.getElementById('navWeight').classList.toggle('active', name==='weight');
+    document.getElementById('navSugar').classList.toggle('active', name==='sugar');
     if(name==='master') closeForm();
     if(name==='history'){
       calMonth = new Date(); calMonth.setDate(1);
@@ -1582,11 +1915,15 @@
       renderCalendar();
     }
     if(name==='milestones') renderMilestones();
+    if(name==='weight') renderWeightSection();
+    if(name==='sugar') renderSugarSection();
   }
   document.getElementById('navToday').addEventListener('click', function(){ showView('today'); });
   document.getElementById('navMaster').addEventListener('click', function(){ showView('master'); });
   document.getElementById('navHistory').addEventListener('click', function(){ showView('history'); });
   document.getElementById('navMilestones').addEventListener('click', function(){ showView('milestones'); });
+  document.getElementById('navWeight').addEventListener('click', function(){ showView('weight'); });
+  document.getElementById('navSugar').addEventListener('click', function(){ showView('sugar'); });
 
   /* ---------------- clock tick: catch overdue transitions + date rollover ---------------- */
   setInterval(function(){
@@ -1676,10 +2013,20 @@
       try{ localStorage.setItem('tm_milestone_overrides', JSON.stringify(overridesCache)); }catch(e){}
       if(currentView === 'milestones') renderMilestones();
     });
+    fb.ref('milestoneDates').on('value', function(snap){
+      milestoneDatesCache = snap.val() || {};
+      try{ localStorage.setItem('tm_milestone_dates', JSON.stringify(milestoneDatesCache)); }catch(e){}
+      if(currentView === 'milestones') renderMilestones();
+    });
     fb.ref('weights').on('value', function(snap){
       weightsCache = snap.val() || [];
       try{ localStorage.setItem('tm_weights', JSON.stringify(weightsCache)); }catch(e){}
-      if(currentView === 'milestones') renderMilestones();
+      if(currentView === 'weight') renderWeightSection();
+    });
+    fb.ref('sugar').on('value', function(snap){
+      sugarCache = snap.val() || [];
+      try{ localStorage.setItem('tm_sugar', JSON.stringify(sugarCache)); }catch(e){}
+      if(currentView === 'sugar') renderSugarSection();
     });
     fb.ref('logs').on('value', function(snap){
       logsCache_ = snap.val() || {};
@@ -1727,7 +2074,9 @@
     var localAlerted = loadAllLocalAlerted();
     var localPregnancy = loadPregnancyLocal();
     var localOverrides = loadMilestoneOverridesLocal();
+    var localMilestoneDates = loadMilestoneDatesLocal();
     var localWeights = loadWeightsLocal();
+    var localSugar = loadSugarLocal();
 
     Promise.all([
       seedIfEmpty('tablets', localTablets),
@@ -1735,7 +2084,9 @@
       seedIfEmpty('alerted', localAlerted),
       seedIfEmpty('pregnancy', localPregnancy),
       seedIfEmpty('milestoneOverrides', localOverrides),
-      seedIfEmpty('weights', localWeights)
+      seedIfEmpty('weights', localWeights),
+      seedIfEmpty('sugar', localSugar),
+      seedIfEmpty('milestoneDates', localMilestoneDates)
     ]).then(function(results){
       tablets = results[0] || [];
       logsCache_ = results[1] || {};
@@ -1743,6 +2094,8 @@
       pregnancyCache = results[3] || null;
       overridesCache = results[4] || {};
       weightsCache = results[5] || [];
+      sugarCache = results[6] || [];
+      milestoneDatesCache = results[7] || {};
       log = logsCache_[currentDateKey] || {};
       alertedIds = alertedCache_[currentDateKey] || [];
 
@@ -1756,6 +2109,8 @@
       renderToday(); renderMaster(); renderPregnancyCard();
       if(currentView === 'history') renderCalendar();
       if(currentView === 'milestones') renderMilestones();
+      if(currentView === 'weight') renderWeightSection();
+      if(currentView === 'sugar') renderSugarSection();
       showToast('Connected — this device is now synced');
     }).catch(function(err){
       syncEnabled = false;
@@ -1836,6 +2191,8 @@
 
   /* ---------------- boot ---------------- */
   document.getElementById('wDate').value = todayKey();
+  document.getElementById('sDate').value = todayKey();
+  document.getElementById('sTime').value = currentTimeHHMM();
   renderToday();
   renderMaster();
   renderPregnancyCard();
