@@ -165,6 +165,7 @@
   .sugar-entry-time{color:var(--muted);font-size:12px;flex-shrink:0;}
   .sugar-entry-row .wr-note{color:var(--muted);flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   .sugar-note{margin-top:20px;font-size:12px;color:var(--muted-dim);line-height:1.5;}
+  .log-list-note{font-size:13px;color:var(--muted-dim);text-align:center;padding:16px 0;}
   .wr-val.status-normal{color:var(--mint-text);}
   .wr-val.status-borderline{color:var(--warn-text);}
   .wr-val.status-high{color:var(--danger-text);}
@@ -269,6 +270,8 @@
   .day-detail-row .dot.yes{background:var(--mint-text);}
   .day-detail-row .dot.no{background:var(--danger-text);}
   .day-detail-row .dot.warn{background:var(--warn-text);}
+  .day-detail-row-click{cursor:pointer;margin:0 -6px;padding-left:6px;padding-right:6px;border-radius:8px;}
+  .day-detail-row-click:hover{background:var(--surface-2);}
   .day-detail-empty{font-size:13px;color:var(--muted-dim);}
 
   /* toast */
@@ -620,6 +623,7 @@
   var OVERDUE_GRACE_MIN = 60;
   var LOW_STOCK_DEFAULT = 5;
   var EXPIRY_WARN_DAYS = 14;
+  var LOG_LIST_DAYS = 15;
   var SNOOZE_MIN = 15;
 
   /* India ANC milestone schedule, expressed as days since LMP (0 = LMP day) */
@@ -1435,16 +1439,28 @@
         if(applicable.length === 0){
           cell.classList.add('nodata');
         } else {
-          var takenN = applicable.filter(function(t){
+          var isTakenFn = function(t){
             var e = dayLog[t.id];
             if(e === undefined || e === null) return false;
             if(e === true) return true;
             if(e === false) return false;
             return !!e.taken;
-          }).length;
-          if(takenN === applicable.length) cell.classList.add('full');
-          else if(takenN > 0) cell.classList.add('partial');
-          else cell.classList.add('none');
+          };
+          var takenN = applicable.filter(isTakenFn).length;
+          if(dateStr === todayStr){
+            var nowMin = new Date().getHours()*60 + new Date().getMinutes();
+            var missedN = applicable.filter(function(t){
+              return !isTakenFn(t) && nowMin >= minutesSinceMidnight(t.time) + OVERDUE_GRACE_MIN;
+            }).length;
+            if(takenN === applicable.length) cell.classList.add('full');
+            else if(takenN === 0 && missedN === 0) cell.classList.add('nodata');
+            else if(takenN === 0 && missedN === applicable.length) cell.classList.add('none');
+            else cell.classList.add('partial');
+          } else {
+            if(takenN === applicable.length) cell.classList.add('full');
+            else if(takenN > 0) cell.classList.add('partial');
+            else cell.classList.add('none');
+          }
         }
         cell.addEventListener('click', (function(ds){ return function(){ showDayDetail(ds); }; })(dateStr));
       }
@@ -1467,12 +1483,22 @@
     if(applicable.length === 0){
       html += '<div class="day-detail-empty">No tablets were set up yet on this day.</div>';
     } else {
+      var todayStr = todayKey();
+      var nowMin = new Date().getHours()*60 + new Date().getMinutes();
       html += applicable.map(function(t){
         var e = dayLog[t.id];
         var taken = e === true || (e && typeof e === 'object' && e.taken);
-        return '<div class="day-detail-row"><span class="dot '+(taken?'yes':'no')+'"></span>' +
+        var statusLabel, dotClass;
+        if(taken){
+          statusLabel = 'Taken'; dotClass = 'yes';
+        } else if(dateStr === todayStr && nowMin < minutesSinceMidnight(t.time) + OVERDUE_GRACE_MIN){
+          statusLabel = 'Not due yet'; dotClass = 'warn';
+        } else {
+          statusLabel = 'Missed'; dotClass = 'no';
+        }
+        return '<div class="day-detail-row day-detail-row-click" data-toggle-tid="'+t.id+'"><span class="dot '+dotClass+'"></span>' +
           '<span>'+escapeHtml(t.name)+'</span>' +
-          '<span style="margin-left:auto;color:var(--muted);font-size:12px;">'+(taken?'Taken':'Missed')+'</span></div>';
+          '<span style="margin-left:auto;color:var(--muted);font-size:12px;">'+statusLabel+'</span></div>';
       }).join('');
     }
 
@@ -1510,7 +1536,35 @@
     }
 
     document.getElementById('dayDetailBody').innerHTML = html;
+    document.getElementById('dayDetailBody').querySelectorAll('[data-toggle-tid]').forEach(function(row){
+      row.addEventListener('click', function(){ toggleHistoryTablet(dateStr, row.dataset.toggleTid); });
+    });
     panel.classList.remove('hidden');
+  }
+
+  function toggleHistoryTablet(dateStr, tabletId){
+    var dayLog = loadLog(dateStr);
+    var e = dayLog[tabletId];
+    var wasTaken = e === true || (e && typeof e === 'object' && e.taken);
+    var prevSnooze = (e && typeof e === 'object') ? (e.snoozeUntil || null) : null;
+    dayLog[tabletId] = {taken: !wasTaken, snoozeUntil: prevSnooze};
+    saveLog(dateStr, dayLog);
+
+    var t = tablets.filter(function(x){ return x.id === tabletId; })[0];
+    if(t && t.stock != null && t.stock !== ''){
+      var stock = Number(t.stock);
+      stock = wasTaken ? stock+1 : Math.max(0, stock-1);
+      syncStockByName(t.name, stock);
+      saveTablets(tablets);
+    }
+
+    if(dateStr === currentDateKey){
+      log = loadLog(currentDateKey);
+    }
+
+    showDayDetail(dateStr);
+    renderToday();
+    renderMaster();
   }
 
   document.getElementById('calPrev').addEventListener('click', function(){
@@ -1768,7 +1822,11 @@
       chartWrap.classList.add('hidden');
     }
 
-    var listSorted = entries.slice().reverse();
+    var listSorted = entries.filter(function(e){ return e.date >= addDaysKey(todayKey(), -(LOG_LIST_DAYS-1)); }).slice().reverse();
+    if(listSorted.length === 0){
+      listEl.innerHTML = '<p class="log-list-note">No entries in the last '+LOG_LIST_DAYS+' days — check History for older entries.</p>';
+      return;
+    }
     listEl.innerHTML = listSorted.map(function(e){
       return '<div class="weight-row">' +
         '<span class="wr-date">'+formatDateNice(e.date)+'</span>' +
@@ -1909,13 +1967,20 @@
       }
     }
 
+    var listCutoff = addDaysKey(todayKey(), -(LOG_LIST_DAYS-1));
     var grouped = {};
     var dateOrder = [];
     allEntries.forEach(function(e){
+      if(e.date < listCutoff) return;
       if(!grouped[e.date]){ grouped[e.date] = []; dateOrder.push(e.date); }
       grouped[e.date].push(e);
     });
     dateOrder.reverse();
+
+    if(dateOrder.length === 0){
+      listEl.innerHTML = '<p class="log-list-note">No readings in the last '+LOG_LIST_DAYS+' days — check History for older entries.</p>';
+      return;
+    }
 
     listEl.innerHTML = dateOrder.map(function(dateStr){
       var dayEntries = grouped[dateStr].slice().reverse();
