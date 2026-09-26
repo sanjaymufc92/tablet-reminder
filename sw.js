@@ -9,9 +9,9 @@
   below (e.g. 'tablet-master-v2') so devices pick up the new file instead
   of serving the old cached copy.
 */
-const CACHE_NAME = 'tablet-master-v1';
+const CACHE_NAME = 'tablet-master-v2';
 const APP_SHELL = [
-  './tablet-master-simple.html',
+  './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
