@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tablet Master</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#0B1614">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tablet Master">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
@@ -2343,6 +2351,24 @@
     if(saved) connectSync(saved);
   })();
 })();
+</script>
+
+<script>
+  /* PWA install support. Only works when this file is served over
+     http(s) (e.g. hosted on GitHub Pages, Netlify, your own server) -
+     browsers refuse to register a service worker for a file:// page.
+     If that's the case this silently does nothing and the app keeps
+     working exactly as before, just without the "Add to Home Screen"
+     install prompt and offline app-shell caching. */
+  (function registerServiceWorker(){
+    if(!('serviceWorker' in navigator)) return;
+    if(location.protocol !== 'http:' && location.protocol !== 'https:') return;
+    window.addEventListener('load', function(){
+      navigator.serviceWorker.register('sw.js').catch(function(err){
+        console.warn('Service worker registration failed:', err);
+      });
+    });
+  })();
 </script>
 
 </body>
