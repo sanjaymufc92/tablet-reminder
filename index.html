@@ -16,6 +16,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js"></script>
 <style>
   :root{
     --bg:#0B1614; --surface:#13221F; --surface-2:#101C19; --line:#1E332E; --line-strong:#24403A;
@@ -96,6 +97,7 @@
   .tag.stock{color:var(--amber-text);border-color:#4A3E22;}
   .tag.stock.low{color:var(--danger-text);border-color:var(--danger-border);}
   .tag.expiry{color:var(--danger-text);border-color:var(--danger-border);}
+  .tag.runsout{color:var(--muted);border-color:var(--line-strong);}
   .tag.normal{color:var(--mint-text);border-color:#1E4A42;}
   .tag.borderline{color:var(--warn-text);border-color:var(--warn-border);}
   .tag.high{color:var(--danger-text);border-color:var(--danger-border);}
@@ -198,6 +200,11 @@
   .sync-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
   .sync-status-dot.on{background:var(--mint-text);}
   .sync-status-dot.off{background:var(--warn-text);}
+  .sync-modal input[type=text]{width:100%;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;
+    padding:10px 12px;font-size:13px;color:var(--text);font-family:inherit;box-sizing:border-box;}
+  .sync-modal input[type=text]:focus{border-color:var(--mint-text);outline:none;}
+  .sync-divider{height:1px;background:var(--line);margin:18px 0;}
+  .push-status-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;font-size:13px;}
   .add-btn{width:42px;height:42px;border-radius:50%;background:var(--mint);color:var(--on-mint);border:none;cursor:pointer;
     font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
   .io-btn{width:42px;height:42px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);color:var(--muted);
@@ -231,7 +238,14 @@
   .tm-list{margin-top:18px;display:flex;flex-direction:column;gap:10px;}
   .tm-row{display:flex;align-items:center;gap:12px;border-radius:16px;border:1px solid var(--line);background:var(--surface);padding:12px 14px;}
   .tm-row .icon{width:34px;height:34px;border-radius:50%;border:1px solid var(--line-strong);background:var(--surface-2);
-    color:var(--mint-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;}
+    color:var(--mint-text);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;overflow:hidden;}
+  .tm-row .icon img{width:100%;height:100%;object-fit:cover;}
+  .card-photo{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0;border:1px solid var(--line-strong);}
+  .photo-picker{display:flex;align-items:center;gap:12px;}
+  .photo-picker .thumb{width:56px;height:56px;border-radius:14px;border:1px solid var(--line-strong);background:var(--surface-2);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;color:var(--muted);font-size:22px;}
+  .photo-picker .thumb img{width:100%;height:100%;object-fit:cover;}
+  .photo-picker .photo-actions{display:flex;gap:8px;}
   .tm-row .info{min-width:0;flex:1;}
   .tm-row .info p{margin:0;font-size:15px;font-weight:500;}
   .tm-row .info span.sub{font-size:12px;color:var(--muted);}
@@ -314,6 +328,7 @@
         <p id="dateText"></p>
       </div>
       <div class="header-right">
+        <button class="io-btn" id="notifStatusBtn" title="Notification settings">🔔</button>
         <button class="theme-toggle-btn io-btn" title="Toggle theme">🌙</button>
         <div class="ring">
           <svg width="60" height="60"><circle cx="30" cy="30" r="26" fill="none" stroke="#1B2E2A" stroke-width="6"/>
@@ -394,6 +409,17 @@
       <div class="field">
         <label>Tablet name</label>
         <input type="text" id="fName" placeholder="e.g. Metformin">
+      </div>
+      <div class="field">
+        <label>Photo (optional)</label>
+        <div class="photo-picker">
+          <div class="thumb" id="fPhotoThumb">💊</div>
+          <div class="photo-actions">
+            <input type="file" id="fPhotoInput" accept="image/*" capture="environment" style="display:none;">
+            <button type="button" class="btn" id="fPhotoPick">Choose photo</button>
+            <button type="button" class="btn danger hidden" id="fPhotoRemove">Remove</button>
+          </div>
+        </div>
       </div>
       <div class="field">
         <label>Dosage (optional)</label>
@@ -609,7 +635,26 @@
     <div id="syncConnectedBlock" class="hidden">
       <div class="sync-status-row"><span class="sync-status-dot" id="syncStatusDot"></span><span id="syncStatusText"></span></div>
       <p>Paste this same config into the app on your other device (one time) to link them together. Both devices will then update live whenever either one changes something.</p>
-      <div class="form-actions">
+
+      <div class="sync-divider"></div>
+      <h2 class="display" style="font-size:16px;">Notify me even when the app is closed</h2>
+      <div class="push-status-row"><span class="sync-status-dot" id="pushStatusDot"></span><span id="pushStatusText">Not set up yet</span></div>
+      <div id="pushSetupRow">
+        <p style="margin:0 0 10px;font-size:12.5px;color:var(--muted);line-height:1.5;">
+          Needs a Web Push key from the same Firebase project: <b>Project settings → Cloud Messaging tab → Web configuration → Generate key pair</b>. Paste it below (one time per device).
+        </p>
+        <input type="text" id="vapidKeyInput" placeholder="Paste your Web Push (VAPID) key here">
+        <div class="form-actions" style="margin-top:10px;">
+          <button class="btn primary" id="pushEnableBtn">Enable</button>
+        </div>
+      </div>
+      <div id="pushOnRow" class="hidden">
+        <div class="form-actions">
+          <button class="btn danger" id="pushDisableBtn">Turn off on this device</button>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:18px;">
         <button class="btn danger" id="syncDisconnectBtn">Disconnect</button>
         <button class="btn primary" id="syncCloseBtn">Done</button>
       </div>
@@ -868,6 +913,19 @@
     var match = tablets.filter(function(t){ return nameKey(t.name) === key && t.stock != null; })[0];
     return match ? match.stock : null;
   }
+  function dailyDoseCount(name){
+    var key = nameKey(name);
+    return tablets.filter(function(t){ return nameKey(t.name) === key; }).length || 1;
+  }
+  function runsOutLabel(t){
+    if(t.stock == null || t.stock === '') return null;
+    var perDay = dailyDoseCount(t.name);
+    var daysLeft = Math.floor(Number(t.stock) / perDay);
+    if(daysLeft <= 0) return 'Runs out today';
+    var target = new Date(todayKey()+'T00:00:00');
+    target.setDate(target.getDate() + daysLeft);
+    return 'Runs out ~' + target.toLocaleDateString(undefined, {month:'short', day:'numeric'});
+  }
 
   /* ---------------- alerts: sound, vibration, notification ---------------- */
   function playAlertSound(){
@@ -918,6 +976,140 @@
     localStorage.setItem('tm_notif_dismissed','1');
     updateNotifBanner();
   });
+
+  /* ---------------- persistent bell button (the one-time banner only shows once; this is always available) ---------------- */
+  function updateNotifStatusBtn(){
+    var btn = document.getElementById('notifStatusBtn');
+    if(!notifSupported()){
+      btn.textContent = '🔕'; btn.title = 'Alerts are not supported in this browser';
+      return;
+    }
+    if(Notification.permission === 'granted'){
+      btn.textContent = '🔔'; btn.title = 'Alerts are on — tap for a test notification';
+    } else if(Notification.permission === 'denied'){
+      btn.textContent = '🔕'; btn.title = 'Alerts are blocked — tap for how to re-enable';
+    } else {
+      btn.textContent = '🔔'; btn.title = 'Tap to turn on overdue alerts';
+    }
+  }
+  document.getElementById('notifStatusBtn').addEventListener('click', function(){
+    if(!notifSupported()){ showToast('Alerts are not supported in this browser'); return; }
+    if(Notification.permission === 'granted'){
+      try{ new Notification('Tablet Master', {body:'Alerts are on. You\'ll be notified like this when a dose is overdue.'}); }catch(e){}
+      showToast('Alerts are already on for this device');
+      return;
+    }
+    if(Notification.permission === 'denied'){
+      showToast('Blocked in your browser — open Site settings for this page and set Notifications to Allow, then reload', 6000);
+      return;
+    }
+    localStorage.removeItem('tm_notif_dismissed');
+    Notification.requestPermission().then(function(perm){
+      updateNotifBanner();
+      updateNotifStatusBtn();
+      showToast(perm === 'granted' ? 'Alerts enabled' : 'Alerts were not enabled');
+    });
+  });
+
+  document.addEventListener('visibilitychange', function(){
+    if(!document.hidden) updateNotifStatusBtn();
+  });
+
+  /* ---------------- push notifications (closed-app alerts via Firebase Cloud Messaging) ----------------
+     Only usable once cross-device sync is on, since a server-side Cloud Function (which you deploy
+     separately) is what actually reads your tablet schedule and sends the push - see the setup guide. */
+  var PUSH_TOKEN_KEY = 'tm_push_token';
+  var VAPID_KEY_STORAGE = 'tm_vapid_key';
+  var messagingForegroundBound = false;
+
+  function pushSupported(){
+    return ('serviceWorker' in navigator) && ('PushManager' in window) && ('Notification' in window) &&
+      (typeof firebase !== 'undefined') && !!firebase.messaging;
+  }
+  function updatePushUI(){
+    var dot = document.getElementById('pushStatusDot');
+    var text = document.getElementById('pushStatusText');
+    var setupRow = document.getElementById('pushSetupRow');
+    var onRow = document.getElementById('pushOnRow');
+    var vapidInput = document.getElementById('vapidKeyInput');
+    if(!dot) return;
+    var savedVapid = localStorage.getItem(VAPID_KEY_STORAGE) || '';
+    if(vapidInput && savedVapid && !vapidInput.value) vapidInput.value = savedVapid;
+    var savedToken = localStorage.getItem(PUSH_TOKEN_KEY);
+    if(!syncEnabled){
+      dot.className = 'sync-status-dot off';
+      text.textContent = 'Turn on sync first (needed to deliver pushes)';
+      setupRow.classList.add('hidden'); onRow.classList.add('hidden');
+      return;
+    }
+    if(!pushSupported()){
+      dot.className = 'sync-status-dot off';
+      text.textContent = 'Not supported in this browser';
+      setupRow.classList.add('hidden'); onRow.classList.add('hidden');
+      return;
+    }
+    if(savedToken && Notification.permission === 'granted'){
+      dot.className = 'sync-status-dot on';
+      text.textContent = 'Enabled on this device';
+      setupRow.classList.add('hidden'); onRow.classList.remove('hidden');
+    } else {
+      dot.className = 'sync-status-dot off';
+      text.textContent = 'Not set up yet';
+      setupRow.classList.remove('hidden'); onRow.classList.add('hidden');
+    }
+  }
+  function bindForegroundPushHandler(){
+    if(messagingForegroundBound) return;
+    try{
+      firebase.messaging().onMessage(function(payload){
+        var d = (payload && (payload.data || payload.notification)) || {};
+        showToast((d.title ? d.title + ': ' : '') + (d.body || 'You have a reminder'), 5000);
+      });
+      messagingForegroundBound = true;
+    }catch(e){ /* messaging not usable in this browser - ignore */ }
+  }
+  function enablePush(){
+    if(!syncEnabled || !fb){ showToast('Turn on sync first'); return; }
+    if(!pushSupported()){ showToast('Push is not supported in this browser'); return; }
+    var vapidKey = (document.getElementById('vapidKeyInput').value || '').trim();
+    if(!vapidKey){ showToast('Paste your Web Push (VAPID) key first'); return; }
+    localStorage.setItem(VAPID_KEY_STORAGE, vapidKey);
+    Notification.requestPermission().then(function(perm){
+      if(perm !== 'granted'){ showToast('Notification permission was not granted'); return; }
+      navigator.serviceWorker.ready.then(function(reg){
+        var messaging = firebase.messaging();
+        try{ messaging.useServiceWorker(reg); }catch(e){}
+        messaging.getToken({vapidKey: vapidKey}).then(function(token){
+          if(!token){ showToast('Could not get a push token'); return; }
+          localStorage.setItem(PUSH_TOKEN_KEY, token);
+          fb.ref('fcmTokens').orderByChild('token').equalTo(token).once('value').then(function(snap){
+            if(snap.exists()) return null;
+            return fb.ref('fcmTokens').push({token: token, addedAt: Date.now(), ua: navigator.userAgent});
+          }).then(function(){
+            bindForegroundPushHandler();
+            showToast('Push notifications enabled on this device');
+            updatePushUI();
+          });
+        }).catch(function(err){
+          console.warn('getToken failed', err);
+          showToast('Could not enable push: ' + (err && err.message ? err.message : 'check your VAPID key'));
+        });
+      });
+    });
+  }
+  function disablePushOnThisDevice(){
+    var token = localStorage.getItem(PUSH_TOKEN_KEY);
+    localStorage.removeItem(PUSH_TOKEN_KEY);
+    if(token && fb){
+      fb.ref('fcmTokens').orderByChild('token').equalTo(token).once('value').then(function(snap){
+        snap.forEach(function(child){ child.ref.remove(); });
+      });
+    }
+    showToast('Push notifications turned off on this device');
+    updatePushUI();
+  }
+  document.getElementById('pushEnableBtn').addEventListener('click', enablePush);
+  document.getElementById('pushDisableBtn').addEventListener('click', disablePushOnThisDevice);
 
   /* ---------------- theme ---------------- */
   function applyTheme(mode){
@@ -992,6 +1184,7 @@
     }
 
     updateNotifBanner();
+    updateNotifStatusBtn();
 
     // timeline
     var tl = document.getElementById('timeline');
@@ -1056,6 +1249,7 @@
       '<div class="'+cls+'">' +
         '<div class="card-top">' +
           '<button class="check'+(taken?' on':'')+'" data-id="'+t.id+'">'+(taken?'✓':'')+'</button>' +
+          (t.photo ? '<img class="card-photo" src="'+t.photo+'" alt="">' : '') +
           '<div class="card-info">' +
             '<p class="card-name">'+escapeHtml(t.name)+(t.dosage?' <span style="color:var(--muted);font-weight:400;font-size:12px;">'+escapeHtml(t.dosage)+'</span>':'')+'</p>' +
             '<div class="card-meta">' +
@@ -1102,14 +1296,17 @@
       if(t.stock != null && t.stock !== ''){
         var low = Number(t.stock) <= LOW_STOCK_DEFAULT;
         badges += '<span class="tag stock'+(low?' low':'')+'">'+t.stock+' left</span>';
+        var runsOut = runsOutLabel(t);
+        if(runsOut) badges += '<span class="tag runsout">'+runsOut+'</span>';
       }
       var expDays = daysUntil(t.expiry);
       if(expDays != null && expDays <= EXPIRY_WARN_DAYS){
         var expLabel = expDays < 0 ? 'Expired' : (expDays===0 ? 'Expires today' : 'Expires in '+expDays+'d');
         badges += '<span class="tag expiry">'+expLabel+'</span>';
       }
+      var iconHtml = t.photo ? '<img src="'+t.photo+'" alt="">' : slotInfo.icon;
       row.innerHTML =
-        '<div class="icon">'+slotInfo.icon+'</div>' +
+        '<div class="icon">'+iconHtml+'</div>' +
         '<div class="info">' +
           '<p>'+escapeHtml(t.name)+(t.dosage?' <span style="color:var(--muted);font-weight:400;font-size:12px;">'+escapeHtml(t.dosage)+'</span>':'')+'</p>' +
           '<span class="sub">'+slotInfo.label+' · '+formatTime(t.time)+' · '+FOOD[t.food]+'</span>' +
@@ -1312,6 +1509,57 @@
   });
   wireSeg('fFood', 'food');
 
+  /* ---------------- tablet photo (resized + compressed to a small data URI, no external storage needed) ---------------- */
+  var formPhoto = null;
+  var PHOTO_MAX_DIM = 300;
+  function setPhotoThumb(dataUri){
+    var thumb = document.getElementById('fPhotoThumb');
+    var removeBtn = document.getElementById('fPhotoRemove');
+    if(dataUri){
+      thumb.innerHTML = '<img src="'+dataUri+'" alt="">';
+      removeBtn.classList.remove('hidden');
+    } else {
+      thumb.textContent = '💊';
+      removeBtn.classList.add('hidden');
+    }
+  }
+  function resizeAndCompress(file, callback){
+    var reader = new FileReader();
+    reader.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var w = img.width, h = img.height;
+        var scale = Math.min(1, PHOTO_MAX_DIM / Math.max(w, h));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(w*scale);
+        canvas.height = Math.round(h*scale);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        callback(canvas.toDataURL('image/jpeg', 0.7));
+      };
+      img.onerror = function(){ showToast('Could not read that image'); };
+      img.src = reader.result;
+    };
+    reader.onerror = function(){ showToast('Could not read that image'); };
+    reader.readAsDataURL(file);
+  }
+  document.getElementById('fPhotoPick').addEventListener('click', function(){
+    document.getElementById('fPhotoInput').click();
+  });
+  document.getElementById('fPhotoInput').addEventListener('change', function(e){
+    var file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if(!file) return;
+    resizeAndCompress(file, function(dataUri){
+      formPhoto = dataUri;
+      setPhotoThumb(formPhoto);
+    });
+  });
+  document.getElementById('fPhotoRemove').addEventListener('click', function(){
+    formPhoto = null;
+    setPhotoThumb(null);
+  });
+
   function updateSaveEnabled(){
     document.getElementById('fSave').disabled = document.getElementById('fName').value.trim().length === 0;
   }
@@ -1325,6 +1573,8 @@
     document.getElementById('fStock').value = '';
     document.getElementById('fExpiry').value = '';
     formState = {slot:'morning', food:'after'};
+    formPhoto = null;
+    setPhotoThumb(null);
     setSegActive('fSlot','morning');
     setSegActive('fFood','after');
     document.getElementById('fSave').textContent = 'Add tablet';
@@ -1340,6 +1590,8 @@
     document.getElementById('fStock').value = (t.stock != null && t.stock !== '') ? t.stock : '';
     document.getElementById('fExpiry').value = t.expiry || '';
     formState = {slot: t.slot, food: t.food};
+    formPhoto = t.photo || null;
+    setPhotoThumb(formPhoto);
     setSegActive('fSlot', t.slot);
     setSegActive('fFood', t.food);
     document.getElementById('fSave').textContent = 'Save changes';
@@ -1369,13 +1621,14 @@
       food: formState.food,
       time: document.getElementById('fTime').value || '08:00',
       stock: stockVal === '' ? null : Math.max(0, Number(stockVal)),
-      expiry: document.getElementById('fExpiry').value || null
+      expiry: document.getElementById('fExpiry').value || null,
+      photo: formPhoto || null
     };
     if(editingId){
       var t = tablets.filter(function(x){ return x.id === editingId; })[0];
       if(t){
         t.name = data.name; t.dosage = data.dosage; t.slot = data.slot; t.food = data.food;
-        t.time = data.time; t.stock = data.stock; t.expiry = data.expiry;
+        t.time = data.time; t.stock = data.stock; t.expiry = data.expiry; t.photo = data.photo;
       }
       if(data.stock != null) syncStockByName(data.name, data.stock);
       showToast('Tablet updated');
@@ -1485,7 +1738,13 @@
     var dateObj = new Date(dateStr+'T00:00:00');
     document.getElementById('dayDetailTitle').textContent = dateObj.toLocaleDateString(undefined,{weekday:'long', month:'long', day:'numeric'});
     var eod = new Date(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate(),23,59,59).getTime();
-    var applicable = tablets.filter(function(t){ return !t.createdAt || t.createdAt <= eod; });
+    var slotOrder = {}; SLOTS.forEach(function(s,i){ slotOrder[s.key] = i; });
+    var applicable = tablets.filter(function(t){ return !t.createdAt || t.createdAt <= eod; }).sort(function(a,b){
+      var sa = slotOrder[a.slot] !== undefined ? slotOrder[a.slot] : 99;
+      var sb = slotOrder[b.slot] !== undefined ? slotOrder[b.slot] : 99;
+      if(sa !== sb) return sa - sb;
+      return (a.time||'').localeCompare(b.time||'');
+    });
     var dayLog = loadLog(dateStr);
     var html = '';
     if(applicable.length === 0){
@@ -2056,6 +2315,7 @@
     document.getElementById('navMilestones').classList.toggle('active', name==='milestones');
     document.getElementById('navWeight').classList.toggle('active', name==='weight');
     document.getElementById('navSugar').classList.toggle('active', name==='sugar');
+    if(name==='today') updateNotifStatusBtn();
     if(name==='master') closeForm();
     if(name==='history'){
       calMonth = new Date(); calMonth.setDate(1);
@@ -2261,6 +2521,8 @@
       if(currentView === 'weight') renderWeightSection();
       if(currentView === 'sugar') renderSugarSection();
       showToast('Connected — this device is now synced');
+      updatePushUI();
+      if(localStorage.getItem(PUSH_TOKEN_KEY)) bindForegroundPushHandler();
     }).catch(function(err){
       syncEnabled = false;
       fb = null;
@@ -2289,6 +2551,7 @@
     log = loadLog(currentDateKey);
     alertedIds = loadAlerted(currentDateKey);
     renderToday(); renderMaster(); renderPregnancyCard();
+    updatePushUI();
     document.getElementById('syncSetupBlock').classList.remove('hidden');
     document.getElementById('syncConnectedBlock').classList.add('hidden');
     document.getElementById('syncConfigInput').value = '';
